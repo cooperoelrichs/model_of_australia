@@ -1,0 +1,22 @@
+{
+    "name": "cpi_data",
+    "params": {
+        "filepath_or_buffer": "../../data/abs-cpi-640101.csv",
+        "header": 0,
+        "skiprows": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        "dtype": null
+    },
+    "date_spec": {"col": "Unnamed: 0", "format": "%b-%Y"},
+    "dollar_columns": [],
+    "dollar_conversion": 1e6,
+    "spec": {
+        "value": "Index Numbers ;  All groups CPI ;  Australia ;",
+        "delta": ["existing", "Percentage Change from Previous Period ;  All groups CPI ;  Australia ;"]
+    },
+
+    "spec-values": [["value", "Index Numbers ;  All groups CPI ;  Australia ;"]],
+    "spec-deltas": [[
+        "delta", "existing",
+        "Percentage Change from Previous Period ;  All groups CPI ;  Australia ;"
+    ]]
+}

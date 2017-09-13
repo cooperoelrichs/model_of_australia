@@ -1,0 +1,19 @@
+{
+    "name": "rba_gdp_data",
+    "params": {
+        "filepath_or_buffer": "../../data/h1-data.csv",
+        "header": 0,
+        "skiprows": [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "dtype": null
+    },
+    "date_spec": {"col": "Title", "format": "%b-%Y"},
+    "dollar_columns": [
+        "Real GDP", "Nominal GDP"
+    ],
+    "dollar_conversion": 1e6,
+    "spec-values": [
+        ["value", "Real GDP"],
+        ["nominal-value", "Nominal GDP"]
+    ],
+    "spec-deltas": [["delta", "calculated", "Real GDP"]]
+}

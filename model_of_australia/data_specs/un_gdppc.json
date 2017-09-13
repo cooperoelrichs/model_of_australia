@@ -1,0 +1,14 @@
+{
+    "name": "un_gdp_pc_data",
+    "params": {
+        "filepath_or_buffer": "../../data/un-GDPPCconstan-countries.csv",
+        "header": 0,
+        "skiprows": [0, 1],
+        "dtype": null
+    },
+    "date_spec": {"from": 1, "to": null, "format": "%Y"},
+    "spec-values": null,
+    "spec-deltas": null,
+    "column_names": "Country",
+    "source": "https://unstats.un.org/unsd/snaama/dnlList.asp"
+}

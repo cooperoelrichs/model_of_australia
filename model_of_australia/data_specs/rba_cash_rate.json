@@ -1,0 +1,18 @@
+{
+    "name": "cash_rate_data",
+    "params": {
+        "filepath_or_buffer": "../../data/a2-data.csv",
+        "header": 0,
+        "skiprows": [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+        "dtype": {
+            "Title": "object",
+            "Change in Cash Rate Target": "np.float64",
+            "New Cash Rate Target": "np.float64"
+        }
+    },
+    "date_spec": {"col": "Title", "format": "%d-%b-%Y"},
+    "dollar_columns": [],
+    "dollar_conversion": 1e6,
+    "spec-values": [["value", "New Cash Rate Target"]],
+    "spec-deltas": [["delta", "existing", "Change in Cash Rate Target"]]
+}
