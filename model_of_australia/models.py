@@ -5,7 +5,11 @@ import theano.tensor as tt
 theano.config.gcc.cxxflags = "-fbracket-depth=1024" # default is 256
 
 
-class model_summariser():
+STANDARD_ITERS = 1e4
+STANDARD_TUNE_ITERS = 2e3
+
+
+class ModelSummariser():
     def traceplots(trace):
         plt.figure(figsize=(7, 7))
         pm.traceplot(trace, combined=True)
@@ -51,12 +55,18 @@ class model_summariser():
                         for i in range(T.shape[2])
                     ]
                 else:
-                    raise ValueError('trace ndim not suported: ndim=%i, shape=%s' % (T_ndim, str(T.shape)))
+                    raise ValueError(
+                        'trace ndim not suported: ndim=%i, shape=%s' %
+                        (T_ndim, str(T.shape))
+                    )
             else:
                 raise ValueError('too many dimensions: %s' % str(dims))
 
             for a, t in ts:
-                print('%s: mean = %.4f, sd = %.6f, shape=%s' % (a, t.mean(), t.std(), str(t.shape)))
+                print(
+                    '%s: mean = %.4f, sd = %.6f, shape=%s' %
+                    (a, t.mean(), t.std(), str(t.shape))
+                )
 
     def gelman_rubin(trace, names, mean_only):
         print('gelman_rubin:')
@@ -158,59 +168,47 @@ class ModelPostProcessor():
                 raise RuntimeError('Dims not supported: %i' % dims)
         return betas
 
-
-def simple_australian_gdp_growth_model(y):
-    iters = 2e4
-    tune_iters = 1e4
-
+def base_gdp_model(y, iters=ITERS, tune_iters=TUNE_ITERS):
     with pm.Model() as model:
-        # Based on a model from: https://blog.quantopian.com/bayesian-cone/
         mu = pm.Normal('mu', 0, 1e6)
         sd = pm.InverseGamma('sd', 1, 1)
-        # nu = pm.Exponential('nu', 0.1)
+        y_hat = pm.Normal('y', mu=mu, sd=sd, observed=y)
 
-        y_hat = pm.Normal('y', mu=mu, sd=sd, observed=y)  # , nu+2
-
-        step = pm.Metropolis()
         trace = pm.sample(
             int(iters),
-            # trace=[y_hat, mu, sd, nu],
             tune=int(tune_iters),
-            step=step,
+            step=pm.Metropolis(),
             njobs=4,
         )
 
     return model, trace
 
+def simple_australian_gdp_growth_model(y, iters=ITERS, tune_iters=TUNE_ITERS):
+    return base_gdp_model(y, iters, tune_iters)
 
-def simple_international_gdp_model(Y, filter_nans):
+
+def simple_international_gdp_model(
+    Y, filter_nans, iters=ITERS, tune_iters=TUNE_ITERS
+):
     # Hierarchical National GDP Model:
     #  - common distribution for mean and variation of national gdp growth; and
     #  - distribution for each nations gdp growth.
 
-    iters = 5e4
-    tune_iters = 2e4
-
     with pm.Model() as model:
-        # Based on a model from: https://blog.quantopian.com/bayesian-cone/
         mu = pm.Normal('mu', 0, 1e6)
         sd = pm.InverseGamma('sd', alpha=1, beta=1)
-        # nu = pm.Exponential('nu', 0.1)
 
         if not filter_nans:
             Y_hat = pm.Normal('Y', mu, sd, observed=Y, shape=Y.shape[1])
-            # y_hat = pm.StudentT('y', nu+2, mu, sd, observed=y)
         elif filter_nans:
             Y_hat = [
                 pm.Normal('y%i' % i, mu, sd, observed=Y[:, i][np.isfinite(Y[:, i])])
                 for i in range(Y.shape[1])
             ]
-            # y_hat = pm.StudentT('y', nu+2, mu, sd, observed=y[np.isfinite(y)])
 
         step = pm.Metropolis()
         trace = pm.sample(
             int(iters),
-            trace=[mu, sd],
             tune=int(tune_iters),
             step=step,
             njobs=4,
@@ -219,10 +217,9 @@ def simple_international_gdp_model(Y, filter_nans):
     return model, trace
 
 
-def shared_variance_international_gdp_model(Y):
-    iters = 5e4
-    tune_iters = 2e4
-
+def shared_variance_international_gdp_model(
+    Y, iters=ITERS, tune_iters=TUNE_ITERS
+):
     with pm.Model() as model:
         MU = pm.Normal('mu', 0, 1e6, shape=Y.shape[1])
         sd = pm.InverseGamma('sd', alpha=1, beta=1)
@@ -236,7 +233,6 @@ def shared_variance_international_gdp_model(Y):
         step = pm.Metropolis()
         trace = pm.sample(
             int(iters),
-            trace=[MU, sd],
             tune=int(tune_iters),
             step=step,
             njobs=4,
@@ -245,21 +241,17 @@ def shared_variance_international_gdp_model(Y):
     return model, trace
 
 
-def internationally_influenced_australian_gdp_growth_model(y, priors):
-    iters = 2e4
-    tune_iters = 1e4
-
+def australian_gdp_model_with_international_priors(
+    y, priors, iters=ITERS, tune_iters=TUNE_ITERS
+):
     with pm.Model() as model:
         mu = pm.Normal('mu', mu=priors['mu'][0][1][0], sd=priors['mu'][0][1][1])
         sd = pm.InverseGamma('sd', alpha=priors['sd'][0][1][0], beta=priors['sd'][0][1][1])
-        # nu = pm.Exponential('nu', lam=priors['nu'][0])
-
-        y_hat = pm.Normal('y', mu=mu, sd=sd, observed=y)  # , nu=nu+2
+        y_hat = pm.Normal('y', mu=mu, sd=sd, observed=y)
 
         step = pm.Metropolis()
         trace = pm.sample(
             int(iters),
-            # trace=[y_hat, mu, sd, nu],
             tune=int(tune_iters),
             step=step,
             njobs=4,
@@ -268,10 +260,7 @@ def internationally_influenced_australian_gdp_growth_model(y, priors):
     return model, trace
 
 
-def correlated_sectors_model(X):
-    iters = 5e4
-    tune_iters = 2e4
-
+def correlated_sectors_model(X, iters=ITERS, tune_iters=TUNE_ITERS):
     with pm.Model() as model:
         SD_gva = pm.InverseGamma('SD_gva', 1, 1, shape=X.shape[1])
         mu_eco = pm.Normal('mu_eco', mu=0, sd=1e6, observed=np.mean(X, axis=1).reshape(-1, 1))

@@ -1,5 +1,5 @@
 {
-    "name": "abs_gdp_data_spec",
+    "name": "abs_gdp",
     "params": {
         "filepath_or_buffer": "../../data/income_from_gdp_inventories_annual.csv",
         "header": 0,

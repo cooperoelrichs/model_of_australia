@@ -7,11 +7,10 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 
 
-def maybe_make_dir(path):
-    os.makedirs(path, exist_ok=True)
-
-
 class DataLoader():
+    def maybe_make_dir(path):
+        os.makedirs(path, exist_ok=True)
+
     def load_specs(dir_path, to_load):
         loaded = {}
         for name, file_name in to_load.items():
@@ -53,13 +52,6 @@ class DataLoader():
             format=spec['date_spec']['format']
         )
 
-        print('\n')
-        print(spec['dollar_columns'])
-        print(raw[spec['dollar_columns']][:5])
-        # print(spec['dollar_conversion'])
-        # print(raw[spec['dollar_columns']] * spec['dollar_conversion'])
-        print('\n')
-
         raw[spec['dollar_columns']] = (
             raw[spec['dollar_columns']] * spec['dollar_conversion']
         )
@@ -79,13 +71,12 @@ class DataLoader():
 
     def data_summary(df, output_dir, fields=None, title=None):
         if fields is None:
-            a, b = ('value', 'delta')
-        else:
-            a, b = fields
+            fields = ['value', 'delta']
+        DataLoader.summary_plot(df, fields, title, output_dir)
 
-        print(df['date'][:5])
-        df.plot(x='date', y=[a, b], subplots=True, title=title, figsize=(4,4))
-        maybe_make_dir(output_dir)
+    def summary_plot(df, fields, title, output_dir):
+        df.plot(x='date', y=fields, subplots=True, title=title, figsize=(4,4))
+        DataLoader.maybe_make_dir(output_dir)
         plt.savefig(os.path.join(output_dir, 'data_summary.png'))
 
     def log_diff(R, axis=None):
@@ -107,7 +98,8 @@ class DataLoader():
     def make_log_diff(df, fields):
         spec = {'date': df['date']}
         for a in fields:
-            spec[a] = log_diff(df[a], axis=0)  # np.log(df[a] / df[a].shift(1))
+            spec[a] = DataLoader.log_diff(df[a], axis=0)
+            # np.log(df[a] / df[a].shift(1))
             # (gva[a] - gva[a].shift(1)) / gva[a].shift(1)
 
         ld = pd.DataFrame(data=spec)
@@ -117,7 +109,7 @@ class DataLoader():
     def make_fractional_diff(df, fields):
         spec = {'date': df['date']}
         for a in fields:
-            spec[a] = fractional_diff(df[a].values, axis=0)
+            spec[a] = DataLoader.fractional_diff(df[a].values, axis=0)
 
         ld = pd.DataFrame(data=spec, index=df.index[1:])
         return ld
