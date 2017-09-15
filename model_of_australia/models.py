@@ -4,9 +4,8 @@ import theano
 import theano.tensor as tt
 theano.config.gcc.cxxflags = "-fbracket-depth=1024" # default is 256
 
-
-STANDARD_ITERS = 1e4
-STANDARD_TUNE_ITERS = 2e3
+ITERS = 1e4
+TUNE_ITERS = 2e3
 
 
 class ModelSummariser():
