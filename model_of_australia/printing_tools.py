@@ -17,7 +17,7 @@ class PrintingTools():
         else:
             return ' %.3f' % x
 
-    def summarise_distributions(data, main, columns, lims, output_dir):
+    def summarise_distributions(data, main, columns, lims,  ):
         columns = list(columns)
         print('\nApproximate v. Normal.')
         for a in [main] + columns:

@@ -1,19 +1,28 @@
+import os
+
+import numpy as np
 import pymc3 as pm
+import matplotlib.pyplot as plt
+from scipy import stats
 
 import theano
 import theano.tensor as tt
 theano.config.gcc.cxxflags = "-fbracket-depth=1024" # default is 256
 
-ITERS = 1e4
-TUNE_ITERS = 2e3
+from printing_tools import PrintingTools
+from data_loader import DataLoader
+
+# ITERS = 1e4
+# TUNE_ITERS = 2e3
 
 
 class ModelSummariser():
-    def traceplots(trace):
+    def traceplots(trace, output_dir):
         plt.figure(figsize=(7, 7))
         pm.traceplot(trace, combined=True)
         plt.tight_layout()
-        plt.show()
+        DataLoader.maybe_make_dir(output_dir)
+        plt.savefig(os.path.join(output_dir, 'traceplots.png'))
 
     def autocorrelation_plots(trace, burn=None):
         if burn is not None:
@@ -79,7 +88,10 @@ class ModelSummariser():
     def dic(model, trace):
         print('dic = %.3f' % (pm.stats.dic(model=model, trace=trace)))
 
-    def summarise(r, names, burn=None, dic=True, gelman_rubin_mean_only=False):
+    def summarise(
+        r, names, output_dir, burn=None, dic=True,
+        gelman_rubin_mean_only=False,
+    ):
         if burn is not None:
             burn = int(burn)
         m, t = r
@@ -88,11 +100,11 @@ class ModelSummariser():
         # for _, a, _ in names:
         #     print(a, t_[a].shape, t_[a][:5])
 
-        mini_summary(t_, names)
-        gelman_rubin(t_, names, gelman_rubin_mean_only)
+        ModelSummariser.mini_summary(t_, names)
+        ModelSummariser.gelman_rubin(t_, names, gelman_rubin_mean_only)
         if dic:
             dic(m, t_)
-        traceplots(t_)
+        ModelSummariser.traceplots(t_, output_dir)
 
 
 class ModelPostProcessor():
@@ -141,7 +153,7 @@ class ModelPostProcessor():
         return fitted
 
     def simple_fit(a, t, i, dist, verbose):
-        fitted = dist_fitter(t, dist)
+        fitted = ModelPostProcessor.dist_fitter(t, dist)
         if verbose:
             print(' -', a, i, fitted)
         return [(i, fitted, dist)]
@@ -151,15 +163,21 @@ class ModelPostProcessor():
         for dims, a, dist in names:
             T = trace[a]
             if dims == 0:
-                betas[a] = simple_fit(a, T, 0, dist, verbose)
+                betas[a] = ModelPostProcessor.simple_fit(
+                    a, T, 0, dist, verbose
+                )
             elif dims == 1:
                 A = []
                 if T.ndim==2:
                     for i in range(T.shape[1]):
-                        A += simple_fit(a, T[:, i], i, dist, verbose)
+                        A += ModelPostProcessor.simple_fit(
+                            a, T[:, i], i, dist, verbose
+                        )
                 elif T.ndim==3:
                     for i in range(T.shape[2]):
-                        A += simple_fit(a, T[:, :, i], i, dist, verbose)
+                        A += ModelPostProcessor.simple_fit(
+                            a, T[:, :, i], i, dist, verbose
+                        )
                 else:
                     raise ValueError()
                 betas[a] = A
@@ -167,7 +185,7 @@ class ModelPostProcessor():
                 raise RuntimeError('Dims not supported: %i' % dims)
         return betas
 
-def base_gdp_model(y, iters=ITERS, tune_iters=TUNE_ITERS):
+def base_gdp_model_fn(y, iters, tune_iters):
     with pm.Model() as model:
         mu = pm.Normal('mu', 0, 1e6)
         sd = pm.InverseGamma('sd', 1, 1)
@@ -182,13 +200,11 @@ def base_gdp_model(y, iters=ITERS, tune_iters=TUNE_ITERS):
 
     return model, trace
 
-def simple_australian_gdp_growth_model(y, iters=ITERS, tune_iters=TUNE_ITERS):
-    return base_gdp_model(y, iters, tune_iters)
+def simple_australian_model_fn(y, iters, tune_iters):
+    return base_gdp_model_fn(y, iters, tune_iters)
 
 
-def simple_international_gdp_model(
-    Y, filter_nans, iters=ITERS, tune_iters=TUNE_ITERS
-):
+def simple_international_model_fn(Y, iters, tune_iters, filter_nans):
     # Hierarchical National GDP Model:
     #  - common distribution for mean and variation of national gdp growth; and
     #  - distribution for each nations gdp growth.
@@ -216,8 +232,8 @@ def simple_international_gdp_model(
     return model, trace
 
 
-def shared_variance_international_gdp_model(
-    Y, iters=ITERS, tune_iters=TUNE_ITERS
+def international_shared_variance_model_fn(
+    Y, iters, tune_iters
 ):
     with pm.Model() as model:
         MU = pm.Normal('mu', 0, 1e6, shape=Y.shape[1])
@@ -240,12 +256,16 @@ def shared_variance_international_gdp_model(
     return model, trace
 
 
-def australian_gdp_model_with_international_priors(
-    y, priors, iters=ITERS, tune_iters=TUNE_ITERS
+def internationally_influenced_australian_model_fn(
+    y, priors, iters, tune_iters
 ):
     with pm.Model() as model:
-        mu = pm.Normal('mu', mu=priors['mu'][0][1][0], sd=priors['mu'][0][1][1])
-        sd = pm.InverseGamma('sd', alpha=priors['sd'][0][1][0], beta=priors['sd'][0][1][1])
+        mu = pm.Normal(
+            'mu', mu=priors['mu'][0][1][0], sd=priors['mu'][0][1][1]
+        )
+        sd = pm.InverseGamma(
+            'sd', alpha=priors['sd'][0][1][0], beta=priors['sd'][0][1][1]
+        )
         y_hat = pm.Normal('y', mu=mu, sd=sd, observed=y)
 
         step = pm.Metropolis()
@@ -259,11 +279,15 @@ def australian_gdp_model_with_international_priors(
     return model, trace
 
 
-def correlated_sectors_model(X, iters=ITERS, tune_iters=TUNE_ITERS):
+def correlated_sectors_model_fn(X, iters, tune_iters):
     with pm.Model() as model:
         SD_gva = pm.InverseGamma('SD_gva', 1, 1, shape=X.shape[1])
-        mu_eco = pm.Normal('mu_eco', mu=0, sd=1e6, observed=np.mean(X, axis=1).reshape(-1, 1))
-        D_gva = pm.Normal('D_gva', mu=mu_eco, sd=SD_gva, observed=X, shape=X.shape[1])
+        mu_eco = pm.Normal(
+            'mu_eco', mu=0, sd=1e6, observed=np.mean(X, axis=1).reshape(-1, 1)
+        )
+        D_gva = pm.Normal(
+            'D_gva', mu=mu_eco, sd=SD_gva, observed=X, shape=X.shape[1]
+        )
 
         step = pm.Metropolis()
         trace = pm.sample(

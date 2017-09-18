@@ -9,9 +9,8 @@ import matplotlib.pyplot as plt
 from data_loader import DataLoader
 from printing_tools import PrintingTools
 from data_tools import DataTools
+from scripts import settings
 
-
-OUTPUTS_DIR = '../../outputs'
 
 DATA_SPECS = DataLoader.load_specs(
     '../data_specs',
@@ -36,6 +35,12 @@ def load_gva_pc_d():
     ])
     gva_categories = [a for a, _ in gva_abs_full_names]
 
+    abs_pop = load_abs_pop()
+
+    date_filter = (
+        abs_pop['date']>=gva_data.date.min()
+    ) & (abs_pop['date']<=gva_data.date.max())
+
     gva_pc_data = gva_data[
         gva_data.columns.difference(['date'])
     ].divide(
@@ -49,6 +54,32 @@ def load_gva_pc_d():
     )
     return gva_pc_d[gva_categories]
 
+def load_abs_pop():
+    abs_pop1 = DataLoader.read_transposed_data_file(DATA_SPECS['abs_population1'])
+    un_pop2 = DataLoader.read_data_file(DATA_SPECS['un_population2'])
+
+    abs_pop1['date'] = abs_pop1['date'].apply(lambda dt: dt.replace(month=6))
+
+    date_filter = pd.to_datetime(
+        ['06-%i' % i for i in range(1981, 2017)],
+        format='%m-%Y'
+    )
+    un_pop2_annual = un_pop2[un_pop2['date'].isin(date_filter)]
+
+    abs_pop = abs_pop1[abs_pop1['date'] < un_pop2_annual['date'].min()].append(
+        un_pop2_annual, ignore_index=True
+    )
+    return abs_pop
+
+def load_un_gdp_pc_d():
+    un_gdp_pc_data = DataLoader.read_transposed_data_file(
+        DATA_SPECS['un_gdppc']
+    )
+    un_gdp_pc_d = DataLoader.make_fractional_diff(
+        un_gdp_pc_data, un_gdp_pc_data.columns.difference(['date'])
+    )
+    national_gdp_columns = un_gdp_pc_d.columns.difference(['date'])
+    return un_gdp_pc_d[national_gdp_columns]
 
 def load_all():
     datas = {}
@@ -56,14 +87,14 @@ def load_all():
         datas[name] = DataLoader.read_data_file(specs[name])
         DataLoader.data_summary(
             datas[name],
-            os.path.join(OUTPUTS_DIR, specs[name]['name']),
+            os.path.join(settings.OUTPUTS_DIR, specs[name]['name']),
             title=specs[name]['name']
         )
 
     gva_data = DataLoader.read_data_file(specs['abs_gva'])
     DataLoader.data_summary(
         gva_data,
-        os.path.join(OUTPUTS_DIR, specs['abs_gva']['name']),
+        os.path.join(settings.OUTPUTS_DIR, specs['abs_gva']['name']),
         title=specs['abs_gva']['name']
     )
     gva_abs_full_names = set([
@@ -80,41 +111,21 @@ def load_all():
         'Afghanistan', 'Australia', 'United States', 'USSR (Former)'
     ]
 
-    un_gdp_pc_data = DataLoader.read_transposed_data_file(specs['un_gdppc'])
     DataLoader.data_summary(
         un_gdp_pc_data,
-        os.path.join(OUTPUTS_DIR, specs['un_gdppc']['name']),
+        os.path.join(settings.OUTPUTS_DIR, specs['un_gdppc']['name']),
         fields=example_countries,
         title=specs['un_gdppc']['name']
     )
 
-    abs_pop1 = DataLoader.read_transposed_data_file(specs['abs_population1'])
-    un_pop2 = DataLoader.read_data_file(specs['un_population2'])
-
-    abs_pop1['date'] = abs_pop1['date'].apply(lambda dt: dt.replace(month=6))
-
-    date_filter = pd.to_datetime(
-        ['06-%i' % i for i in range(1981, 2017)],
-        format='%m-%Y'
-    )
-    un_pop2_annual = un_pop2[un_pop2['date'].isin(date_filter)]
-
-    abs_pop = abs_pop1[abs_pop1['date'] < un_pop2_annual['date'].min()].append(
-        un_pop2_annual, ignore_index=True
-    )
 
     # abs_pop.plot(x='date', y='value')
     DataLoader.data_summary(
         abs_pop,
-        os.path.join(OUTPUTS_DIR, specs['abs_population1']['name']),
+        os.path.join(settings.OUTPUTS_DIR, specs['abs_population1']['name']),
         fields=['value'],
         title=specs['abs_population1']['name']
     )
-
-
-    date_filter = (
-        abs_pop['date']>=gva_data.date.min()
-    ) & (abs_pop['date']<=gva_data.date.max())
 
     gva_pc_ld = DataLoader.make_log_diff(
         gva_pc_data, gva_pc_data.columns.difference(['date'])
@@ -123,19 +134,16 @@ def load_all():
     un_gdp_pc_ld = DataLoader.make_log_diff(
         un_gdp_pc_data, un_gdp_pc_data.columns.difference(['date'])
     )
-    un_gdp_pc_d = DataLoader.make_fractional_diff(
-        un_gdp_pc_data, un_gdp_pc_data.columns.difference(['date'])
-    )
 
     DataLoader.data_summary(
         un_gdp_pc_d,
-        os.path.join(OUTPUTS_DIR, 'un_gdp_pc_d'),
+        os.path.join(settings.OUTPUTS_DIR, 'un_gdp_pc_d'),
         fields=example_countries,
         title='un_gdp_pc_d'
     )
     DataLoader.data_summary(
         gva_pc_d,
-        os.path.join(OUTPUTS_DIR, 'gva_pc_d'),
+        os.path.join(settings.OUTPUTS_DIR, 'gva_pc_d'),
         fields=['gdp'],
         title='gva_pc_d'
     )
@@ -148,7 +156,7 @@ def load_all():
     # ax = plt.axes()
     DataLoader.data_summary(
         gva_pc_data,
-        os.path.join(OUTPUTS_DIR, 'gva_pc_data'),
+        os.path.join(settings.OUTPUTS_DIR, 'gva_pc_data'),
         fields=['gdp', 'annual gdp delta / gdp'],
         title='gva_pc_data'
     )
@@ -171,13 +179,13 @@ def load_all():
         label='deflated abs gdp'
     )
     plt.legend(loc=0)
-    DataLoader.maybe_make_dir(os.path.join(OUTPUTS_DIR, 'general'))
-    plt.savefig(os.path.join(OUTPUTS_DIR, 'general', 'GDP data sources.png'))
+    DataLoader.maybe_make_dir(os.path.join(settings.OUTPUTS_DIR, 'general'))
+    plt.savefig(os.path.join(settings.OUTPUTS_DIR, 'general', 'GDP data sources.png'))
 
     # GDP and sum of GVA
     plt.plot(gva_data['date'], gva_data['gdp'])
     plt.plot(gva_data['date'], gva_data[gva_categories].values.sum(axis=1))
-    plt.savefig(os.path.join(OUTPUTS_DIR, 'general', 'GDP and sum of GVA.png'))
+    plt.savefig(os.path.join(settings.OUTPUTS_DIR, 'general', 'GDP and sum of GVA.png'))
 
     gva_ld = DataLoader.make_log_diff(gva_data, ['gdp'] + gva_categories)
     gva_d = DataLoader.make_fractional_diff(gva_data, ['gdp'] + gva_categories)
@@ -197,7 +205,7 @@ def load_all():
     gva_data[gva_date_filter].plot(
         x='date', y=gva_categories, legend=False, ax=ax, linewidth=1
     )
-    plt.savefig(os.path.join(OUTPUTS_DIR, 'general', 'GVA.png'))
+    plt.savefig(os.path.join(settings.OUTPUTS_DIR, 'general', 'GVA.png'))
 
     print('\nGVA growth.')
     plt.figure()
@@ -211,12 +219,12 @@ def load_all():
         x='date', y=gva_categories, legend=False, ax=ax, linewidth=0.6
     )
     plt.ylim((-0.05, 0.11))
-    plt.savefig(os.path.join(OUTPUTS_DIR, 'general', 'GVA growth.png'))
+    plt.savefig(os.path.join(settings.OUTPUTS_DIR, 'general', 'GVA growth.png'))
 
 
     PrintingTools.summarise_distributions(
         gva_d, 'gdp', gva_categories, (-0.2, 0.3),
-        os.path.join(OUTPUTS_DIR, 'general')
+        os.path.join(settings.OUTPUTS_DIR, 'general')
     )
 
     # print('Approximated v. Laplace v. Cauchy.')
@@ -238,5 +246,5 @@ def load_all():
         'Australia',
         example_countries,
         (-0.1, 0.2),
-        os.path.join(OUTPUTS_DIR, 'general')
+        os.path.join(settings.OUTPUTS_DIR, 'general')
     )
