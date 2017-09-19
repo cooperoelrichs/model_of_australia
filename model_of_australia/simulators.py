@@ -1,3 +1,7 @@
+import numpy as np
+from scipy import stats
+
+
 class GDPSimulator():
     def fit_distribution(X, dist):
         return dist.fit(X[np.isfinite(X)])
@@ -80,7 +84,6 @@ class GDPSimulatorWithCorrelatedSectors():
             init_gva, n_years, n_iter, params
         )
         return simulation
-
 
     def simulate(init_gva, n_years, n_iter, params):
         gdp_sim = np.empty((n_iter, n_years))

@@ -94,6 +94,7 @@ class ModelSummariser():
     ):
         if burn is not None:
             burn = int(burn)
+
         m, t = r
         t_ = t[burn:]
 

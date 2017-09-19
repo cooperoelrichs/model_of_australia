@@ -38,8 +38,8 @@ def load_gva_pc_d():
     abs_pop = load_abs_pop()
 
     date_filter = (
-        abs_pop['date']>=gva_data.date.min()
-    ) & (abs_pop['date']<=gva_data.date.max())
+        abs_pop['date'] >= gva_data.date.min()
+    ) & (abs_pop['date'] <= gva_data.date.max())
 
     gva_pc_data = gva_data[
         gva_data.columns.difference(['date'])
@@ -52,7 +52,16 @@ def load_gva_pc_d():
     gva_pc_d = DataLoader.make_fractional_diff(
         gva_pc_data, gva_pc_data.columns.difference(['date'])
     )
-    return gva_pc_d[gva_categories]
+
+    gva_pc_data_by_date = pd.DataFrame(
+        data=gva_pc_data[gva_categories].values,
+        index=gva_pc_data['date']
+    )
+    gva_pc_d_by_date = pd.DataFrame(
+        data=gva_pc_d[gva_categories].values,
+        index=gva_pc_d['date']
+    )
+    return gva_pc_data_by_date, gva_pc_d_by_date
 
 def load_abs_pop():
     abs_pop1 = DataLoader.read_transposed_data_file(DATA_SPECS['abs_population1'])
