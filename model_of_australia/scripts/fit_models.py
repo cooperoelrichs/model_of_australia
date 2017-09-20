@@ -4,7 +4,7 @@ sys.path.insert(0, "../")
 import numpy as np
 from scipy import stats
 
-from simulation_container import SimulationContainer
+from model_container import ModelContainer
 from scripts.load_data import load_gva_pc_d, load_un_gdp_pc_d
 from scripts import settings
 from models import (
@@ -16,32 +16,42 @@ from models import (
     ModelPostProcessor, ModelSummariser
 )
 
+def fit_simple_australian_model():
+    simple_australian_model = ModelContainer(
+        name='Simple Australian Model',
+        folder='simple_australian_model',
+        model_fn=simple_australian_model_fn,
+        data=load_un_gdp_pc_d()[1]['Australia'].values,
+        parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)]
+    )
+    simple_australian_model.run()
+    return simple_australian_model
 
-simple_australian_model = ModelContainer(
-    name='Simple Australian Model',
-    folder='simple_australian_model',
-    model_fn=simple_australian_model_fn,
-    data=load_un_gdp_pc_d()['Australia'].values,
-    parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)]
-)
-simple_australian_model.run()
+def fit_correlated_sectors_model():
+    correlated_sectors_model = ModelContainer(
+        name='Correlated Sectors Model',
+        folder='correlated_sectors_model',
+        model_fn=correlated_sectors_model_fn,
+        data=load_gva_pc_d()[1].values,
+        parameter_spec=[(0, 'mu_eco', stats.norm), (1, 'SD_gva', stats.invgamma)]
+    )
+    correlated_sectors_model.run()
+    return correlated_sectors_model
 
-correlated_sectors_model = ModelContainer(
-    name='Correlated Sectors Model',
-    folder='correlated_sectors_model',
-    model_fn=correlated_sectors_model_fn,
-    data=load_gva_pc_d().values,
-    parameter_spec=[(0, 'mu_eco', stats.norm), (1, 'SD_gva', stats.invgamma)]
-)
-correlated_sectors_model.run()
-
-international_shared_variance_model = ModelContainer(
-    name='International Shared Variance Model',
-    folder='international_shared_variance_model',
-    model_fn=international_shared_variance_model_fn,
-    data=load_un_gdp_pc_d().values,
-    parameter_spec=[(1, 'mu', stats.norm), (0, 'sd', stats.invgamma)]
-)
+def fit_international_shared_variance_model():
+    international_shared_variance_model = ModelContainer(
+        name='International Shared Variance Model',
+        folder='international_shared_variance_model',
+        model_fn=international_shared_variance_model_fn,
+        data=load_un_gdp_pc_d()[1].values,
+        parameter_spec=[(1, 'mu', stats.norm), (0, 'sd', stats.invgamma)]
+    )
+    international_shared_variance_model.run()
+    extract_mu_for_australia(
+        international_shared_variance_model,
+        load_un_gdp_pc_d()[1],
+    )
+    return international_shared_variance_model
 
 def extract_mu_for_australia(model, data):
     model.parameters['mu_australia'] = [
@@ -52,28 +62,26 @@ def extract_mu_for_australia(model, data):
         ]
     ]
 
-international_shared_variance_model.run()
-extract_mu_for_australia(
-    international_shared_variance_model,
-    load_un_gdp_pc_d(),
-)
+def fit_simple_international_model():
+    simple_international_model = ModelContainer(
+        name='Simple International Model',
+        folder='simple_international_model',
+        model_fn=simple_international_model_fn,
+        data=load_un_gdp_pc_d()[1].values,
+        parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)],
+        fn_args={'filter_nans':True}
+    )
+    simple_international_model.run()
+    return simple_international_model
 
-simple_international_model = ModelContainer(
-    name='Simple International Model',
-    folder='simple_international_model',
-    model_fn=simple_international_model_fn,
-    data=load_un_gdp_pc_d().values,
-    parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)],
-    fn_args={'filter_nans':True}
-)
-simple_international_model.run()
-
-internationally_influenced_australian_model = ModelContainer(
-    name='Internationally Influenced Model',
-    folder='internationally_influenced_model',
-    model_fn=internationally_influenced_australian_model_fn,
-    data=load_un_gdp_pc_d()['Australia'].values,
-    parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)],
-    fn_args={'priors':simple_international_model.parameters}
-)
-internationally_influenced_australian_model.run()
+def fit_internationally_influenced_australian_model():
+    internationally_influenced_australian_model = ModelContainer(
+        name='Internationally Influenced Model',
+        folder='internationally_influenced_model',
+        model_fn=internationally_influenced_australian_model_fn,
+        data=load_un_gdp_pc_d()[1]['Australia'].values,
+        parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)],
+        fn_args={'priors':simple_international_model.parameters}
+    )
+    internationally_influenced_australian_model.run()
+    return internationally_influenced_australian_model

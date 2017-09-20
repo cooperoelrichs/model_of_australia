@@ -26,7 +26,27 @@ DATA_SPECS = DataLoader.load_specs(
     }
 )
 
+def make_date_indexed(df):
+    value_columns = df.columns.difference(['date'])
+    return pd.DataFrame(
+        data=df[value_columns].values,
+        index=df['date'],
+        columns=df[value_columns].columns
+    )
+
 def load_gva_pc_d():
+    gva_pc_data, gva_pc_d, gva_categories = load_all_gva_data()
+    gva_pc_data_by_date = make_date_indexed(gva_pc_data[gva_categories + ['date']])
+    gva_pc_d_by_date = make_date_indexed(gva_pc_d[gva_categories + ['date']])
+    return gva_pc_data_by_date, gva_pc_d_by_date
+
+def load_gdp_pc_d():
+    gva_pc_data, gva_pc_d, _ = load_all_gva_data()
+    gdp_pc_data_by_date = make_date_indexed(gva_pc_data[['gdp', 'date']])
+    gdp_pc_d_by_date = make_date_indexed(gva_pc_d[['gdp', 'date']])
+    return gdp_pc_data_by_date, gdp_pc_d_by_date
+
+def load_all_gva_data():
     gva_data = DataLoader.read_data_file(DATA_SPECS['abs_gva'])
 
     gva_abs_full_names = set([
@@ -53,15 +73,7 @@ def load_gva_pc_d():
         gva_pc_data, gva_pc_data.columns.difference(['date'])
     )
 
-    gva_pc_data_by_date = pd.DataFrame(
-        data=gva_pc_data[gva_categories].values,
-        index=gva_pc_data['date']
-    )
-    gva_pc_d_by_date = pd.DataFrame(
-        data=gva_pc_d[gva_categories].values,
-        index=gva_pc_d['date']
-    )
-    return gva_pc_data_by_date, gva_pc_d_by_date
+    return gva_pc_data, gva_pc_d, gva_categories
 
 def load_abs_pop():
     abs_pop1 = DataLoader.read_transposed_data_file(DATA_SPECS['abs_population1'])
@@ -88,7 +100,14 @@ def load_un_gdp_pc_d():
         un_gdp_pc_data, un_gdp_pc_data.columns.difference(['date'])
     )
     national_gdp_columns = un_gdp_pc_d.columns.difference(['date'])
-    return un_gdp_pc_d[national_gdp_columns]
+
+    un_gdp_pc_data_by_date = make_date_indexed(
+        un_gdp_pc_data[national_gdp_columns | ['date']]
+    )
+    un_gdp_pc_d_by_date = make_date_indexed(
+        un_gdp_pc_d[national_gdp_columns | ['date']]
+    )
+    return un_gdp_pc_data_by_date, un_gdp_pc_d_by_date
 
 def load_all():
     datas = {}

@@ -25,16 +25,15 @@ class GDPSimulator():
         return gdp_sim
 
 
-class SimpleInternationalGDPSimulator():
+class SimpleSimulator():
     def run(gdp_data, params, n_years, n_iter):
         n_iter = int(n_iter)
 
         init_gdp = gdp_data[-1]
-        simulation = SimpleInternationalGDPSimulator.simulate(
+        simulation = SimpleSimulator.simulate(
             init_gdp, n_years, n_iter, params
         )
         return simulation
-
 
     def simulate(init_gdp, n_years, n_iter, params):
         gdp_sim = np.empty((n_iter, n_years))
@@ -45,7 +44,6 @@ class SimpleInternationalGDPSimulator():
 
             ratios = np.cumprod(deltas + 1)
             gdp_sim[i, :] = init_gdp * ratios
-
         return gdp_sim
 
 

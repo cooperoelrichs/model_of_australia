@@ -40,14 +40,18 @@ class SimulationContainer(object):
     def plot_sim(self):
         plt.figure(figsize=(20, 10))
 
-        print(self.values.index.shape, self.values.values.sum(axis=1).shape)
+        if self.values.values.ndim == 1:
+            reduced_values = self.values.values
+        elif self.values.values.ndim == 2:
+            reduced_values = self.values.values.sum(axis=1)
+        else:
+            raise ValueError('%i ndim is not supported yet.' % self.values.ndim)
 
-        plt.plot(self.values.index, self.values.values.sum(axis=1))
+        plt.plot(self.values.index, reduced_values)
         plt.plot(self.make_date_range(), self.simulate.T)
         file_path = os.path.join(
             settings.OUTPUTS_DIR,
             self.folder,
             'simulation_plot.png'
         )
-        print(file_path)
         plt.savefig(file_path)
