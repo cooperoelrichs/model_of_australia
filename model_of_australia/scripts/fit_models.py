@@ -47,20 +47,25 @@ def fit_international_shared_variance_model():
         parameter_spec=[(1, 'mu', stats.norm), (0, 'sd', stats.invgamma)]
     )
     international_shared_variance_model.run()
-    extract_mu_for_australia(
-        international_shared_variance_model,
+    parameters = extract_mu_for_australia(
+        international_shared_variance_model.parameters,
         load_un_gdp_pc_d()[1],
     )
+    ModelContainer.save_parameters(
+        parameters, international_shared_variance_model.folder
+    )
+    international_shared_variance_model.parameters = parameters
     return international_shared_variance_model
 
-def extract_mu_for_australia(model, data):
-    model.parameters['mu_australia'] = [
-        model.parameters['mu'][
-            np.array(range(len(model.parameters['mu'])))[
+def extract_mu_for_australia(parameters, data):
+    parameters['mu_australia'] = [
+        parameters['mu'][
+            np.array(range(len(parameters['mu'])))[
                 np.where(data.columns == 'Australia')[0][0]
             ]
         ]
     ]
+    return parameters
 
 def fit_simple_international_model():
     simple_international_model = ModelContainer(

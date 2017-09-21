@@ -27,7 +27,7 @@ class ModelContainer(object):
         self.results = self.fit_model()
         self.summarise()
         self.parameters = self.calculate_parameters()
-        self.save_parameters()
+        ModelContainer.save_parameters(self.parameters, self.folder)
         print('Done.')
 
     def fit_model(self):
@@ -51,9 +51,9 @@ class ModelContainer(object):
         )
         return parameters
 
-    def save_parameters(self):
-        string_parameters = self.make_json_ready(self.parameters)
-        with open(ModelContainer.parameters_file_path(self.folder), 'w') as f:
+    def save_parameters(parameters, folder):
+        string_parameters = ModelContainer.make_json_ready(parameters)
+        with open(ModelContainer.parameters_file_path(folder), 'w') as f:
             json.dump(string_parameters, f, indent=4)
 
     def parameters_file_path(folder_name):
@@ -63,9 +63,9 @@ class ModelContainer(object):
             'parameters.json'
         )
 
-    def make_json_ready(self, parameters):
+    def make_json_ready(parameters):
         string_parameters = {}
-        for a, P in self.parameters.items():
+        for a, P in parameters.items():
             string_parameters[a] = []
             for p_i in P:
                 n, betas, dist = p_i
@@ -82,7 +82,7 @@ class ModelContainer(object):
                 n, betas, dist_str = p_i
                 betas = tuple([np.float64(b) for b in betas])
                 dist = ModelContainer.str_to_dist(dist_str)
-                parameters[a] += [(n, betas, dist_str)]
+                parameters[a] += [(n, betas, dist)]
         return parameters
 
     def dist_to_str(dist):

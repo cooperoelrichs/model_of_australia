@@ -51,51 +51,50 @@ def summarise_simulations(results):
         PlottingTools.plot_prediction_cone(a, S, R, dates)
 
 
-correlated_sectors_model = fit_correlated_sectors_model()
+# correlated_sectors_model = fit_correlated_sectors_model()
 correlated_sectors_sim = SimulationContainer(
     name='Correlated Sectors Simulation',
     folder='correlated_sectors_model',
     simulator=GDPSimulatorWithCorrelatedSectors,
     values_deltas_pair=load_gva_pc_d(),
-    parameters=correlated_sectors_model.parameters,
+    load_parameters=True,
     n_years=N_YEARS, n_iter=N_ITER
 )
 correlated_sectors_sim.simulate()
 
-
-international_shared_variance_model = fit_international_shared_variance_model()
+# international_shared_variance_model = fit_international_shared_variance_model()
 X, D = load_un_gdp_pc_d()
 international_shared_variance_sim = SimulationContainer(
     name='International Shared Variance Simulation',
     folder='international_shared_variance_model',
     simulator=SharedVarianceInternationalGDPSimulator,
     values_deltas_pair=(X['Australia'], D['Australia']),
-    parameters=international_shared_variance_model.parameters,
+    load_parameters=True,
     n_years=N_YEARS, n_iter=N_ITER
 )
 international_shared_variance_sim.simulate()
 
 
-simple_australian_model = fit_simple_australian_model()
+# simple_australian_model = fit_simple_australian_model()
 simple_australian_simulation = SimulationContainer(
     name='Simple Australian Simulation',
     folder='simple_australian_model',
     simulator=SimpleSimulator,
     values_deltas_pair=load_gdp_pc_d(),
-    parameters=simple_australian_model.parameters,
+    load_parameters=True,
     n_years=N_YEARS, n_iter=N_ITER
 )
 simple_australian_simulation.simulate()
 
 
-simple_internation_model = fit_simple_international_model()
+# simple_internation_model = fit_simple_international_model()
 X, D = load_un_gdp_pc_d()
 simple_internation_simulation = SimulationContainer(
     name='Simple Internation Simulation',
     folder='simple_international_model',
     simulator=SimpleSimulator,
     values_deltas_pair=(X['Australia'], D['Australia']),
-    parameters=simple_internation_model.parameters,
+    load_parameters=True,
     n_years=N_YEARS, n_iter=N_ITER
 )
 simple_internation_simulation.simulate()

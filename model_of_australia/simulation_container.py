@@ -20,7 +20,6 @@ class SimulationContainer(object):
 
         if parameters is None and load_parameters is True:
             self.parameters = ModelContainer.load_parameters(self.folder)
-            print(self.parameters)
         elif parameters is not None and load_parameters is False:
             self.parameters = parameters
         else:
