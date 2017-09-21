@@ -1,12 +1,13 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+from model_container import ModelContainer
 from scripts import settings
 
 
 class SimulationContainer(object):
     def __init__(self, name, folder, values_deltas_pair, simulator,
-                 parameters, n_years, n_iter):
+                 n_years, n_iter, parameters=None, load_parameters=False):
         self.name = name
         self.folder = folder
         self.simulator = simulator
@@ -14,9 +15,18 @@ class SimulationContainer(object):
         self.values = values_deltas_pair[0]
         self.deltas = values_deltas_pair[1]
 
-        self.parameters = parameters
         self.n_years = n_years
         self.n_iter = n_iter
+
+        if parameters is None and load_parameters is True:
+            self.parameters = ModelContainer.load_parameters(self.folder)
+            print(self.parameters)
+        elif parameters is not None and load_parameters is False:
+            self.parameters = parameters
+        else:
+            raise ValueError(
+                'Must either provide parameters or set load_parameters to True.'
+            )
 
     def simulate(self):
         self.simulate = self.run()
