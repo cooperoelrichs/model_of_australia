@@ -6,7 +6,7 @@ from models import ModelPostProcessor, ModelSummariser
 class ModelContainer(object):
     def __init__(
         self, name, folder, model_fn, data, parameter_spec,
-        fn_args={}, iters=1e4, tune_iters=2e3
+        fn_args={}, iters=1e4, tune_iters=1e3
     ):
         self.name = name
         self.folder = folder
