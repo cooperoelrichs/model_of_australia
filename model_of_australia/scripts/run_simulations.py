@@ -110,9 +110,9 @@ gdp_data = [
 summarise_gdp_data(gdp_data)
 
 simulation_results = [
-    ('simple normal model           ', simple_australian_simulation     , load_gdp_pc_d()[0].values                , gva_pc['date']),
+    ('simple normal model           ', simple_australian_simulation     , load_gdp_pc_d()[0].values                , load_gdp_pc_d()[0].index),
     ('correlated sectors model      ', correlated_sectors_sim           , load_gdp_pc_d()[0].values                , load_gdp_pc_d()[0].index),
-    ('simple international model    ', simple_internation_simulation    , load_un_gdp_pc_d()[0]['Australia'].values, un_gdp_pc['date']),
-    ('shared var international model', international_shared_variance_sim, load_un_gdp_pc_d()[0]['Australia'].values, un_gdp_pc['date']),
+    ('simple international model    ', simple_internation_simulation    , load_un_gdp_pc_d()[0]['Australia'].values, load_un_gdp_pc_d()[0].index),
+    ('shared var international model', international_shared_variance_sim, load_un_gdp_pc_d()[0]['Australia'].values, load_un_gdp_pc_d()[0].index),
 ]
 summarise_simulations(simulation_results)
