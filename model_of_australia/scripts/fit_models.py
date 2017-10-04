@@ -22,7 +22,7 @@ def fit_simple_australian_model():
         folder='simple_australian_model',
         model_fn=simple_australian_model_fn,
         data=load_un_gdp_pc_d()[1]['Australia'].values,
-        parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)]
+        parameter_spec=[(0, 'd', stats.norm)]
     )
     simple_australian_model.run()
     return simple_australian_model

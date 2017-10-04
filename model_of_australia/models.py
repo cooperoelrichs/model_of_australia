@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import pandas as pd
 import pymc3 as pm
 import matplotlib.pyplot as plt
 from scipy import stats
@@ -102,7 +103,8 @@ class ModelSummariser():
         #     print(a, t_[a].shape, t_[a][:5])
 
         ModelSummariser.mini_summary(t_, names)
-        ModelSummariser.gelman_rubin(t_, names, gelman_rubin_mean_only)
+        if t_.nchains > 1:
+            ModelSummariser.gelman_rubin(t_, names, gelman_rubin_mean_only)
         if dic:
             dic(m, t_)
         ModelSummariser.traceplots(t_, output_dir)
@@ -202,7 +204,25 @@ def base_gdp_model_fn(y, iters, tune_iters):
     return model, trace
 
 def simple_australian_model_fn(y, iters, tune_iters):
-    return base_gdp_model_fn(y, iters, tune_iters)
+    with pm.Model() as model:
+        d = pm.Normal('d', mu=0, sd=1e6, observed=y)
+        trace = pm.backends.ndarray.NDArray(name='.', model=model, vars=[d])
+        trace.samples = {}
+        trace.samples['d'] = y
+        mt = pm.backends.base.MultiTrace([trace])
+
+    # with pm.Model() as model:
+    #     d = pm.Normal('d', mu=0, sd=1e6)
+    #     y_hat = pm.Normal('y', mu=d, sd=1e6, observed=y)
+    #
+    #     trace = pm.sample(
+    #         int(iters),
+    #         tune=int(tune_iters),
+    #         step=pm.Metropolis(),
+    #         njobs=4,
+    #     )
+
+    return model, mt
 
 
 def simple_international_model_fn(Y, iters, tune_iters, filter_nans):

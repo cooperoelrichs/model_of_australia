@@ -38,14 +38,30 @@ class SimpleSimulator():
     def simulate(init_gdp, n_years, n_iter, params):
         gdp_sim = np.empty((n_iter, n_years))
         for i in range(n_iter):
-            mu = params['mu'][0][2].rvs(*params['mu'][0][1])
-            sd = params['sd'][0][2].rvs(*params['sd'][0][1])
-            deltas = stats.norm.rvs(mu, sd, size=n_years)
-
+            deltas = params['d'][0][2].rvs(*params['d'][0][1], size=n_years)
             ratios = np.cumprod(deltas + 1)
             gdp_sim[i, :] = init_gdp * ratios
         return gdp_sim
 
+class CommonDistrubutionSimulator():
+    def run(gdp_data, params, n_years, n_iter):
+        n_iter = int(n_iter)
+
+        init_gdp = gdp_data[-1]
+        simulation = CommonDistrubutionSimulator.simulate(
+            init_gdp, n_years, n_iter, params
+        )
+        return simulation
+
+    def simulate(init_gdp, n_years, n_iter, params):
+        gdp_sim = np.empty((n_iter, n_years))
+        for i in range(n_iter):
+            mu = params['mu'][0][2].rvs(*params['mu'][0][1])
+            sd = params['sd'][0][2].rvs(*params['sd'][0][1])
+            deltas = stats.norm.rvs(mu, sd, size=n_years)
+            ratios = np.cumprod(deltas + 1)
+            gdp_sim[i, :] = init_gdp * ratios
+        return gdp_sim
 
 
 class SharedVarianceInternationalGDPSimulator():

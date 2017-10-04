@@ -9,7 +9,7 @@ from models import ModelPostProcessor, ModelSummariser
 class ModelContainer(object):
     def __init__(
         self, name, folder, model_fn, data, parameter_spec,
-        fn_args={}, iters=1e4, tune_iters=1e3
+        fn_args={}, iters=1e4, tune_iters=1e3, burn=None
     ):
         self.name = name
         self.folder = folder
@@ -19,6 +19,7 @@ class ModelContainer(object):
         self.fn_args = fn_args
         self.iters = iters
         self.tune_iters = tune_iters
+        self.burn = burn
 
     def run(self):
         start_str = 'Running %s.' % self.name
@@ -41,7 +42,7 @@ class ModelContainer(object):
         ModelSummariser.summarise(
             self.results, self.parameter_spec,
             output_dir=os.path.join(settings.OUTPUTS_DIR, self.folder),
-            burn=2e3, dic=False, gelman_rubin_mean_only=True
+            burn=self.burn, dic=False, gelman_rubin_mean_only=True
         )
 
     def calculate_parameters(self):
