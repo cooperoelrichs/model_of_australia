@@ -9,6 +9,7 @@ from simulation_container import SimulationContainer
 from plotting_tools import PlottingTools
 from data_loader import DataLoader
 from scripts.load_data import load_gva_pc_d, load_gdp_pc_d, load_un_gdp_pc_d
+from scripts import settings
 from scripts.fit_models import (
     fit_international_shared_variance_model,
     fit_correlated_sectors_model,
@@ -18,37 +19,12 @@ from scripts.fit_models import (
 from simulators import (
     GDPSimulatorWithCorrelatedSectors,
     SharedVarianceInternationalGDPSimulator,
-    SimpleSimulator
+    SimpleSimulator,
+    CommonDistrubutionSimulator
 )
-
-
-N_YEARS = 20
-N_ITER = 1e4
-
-
-def pnt_summary_stats(a, r):
-    print(' - %s - mean=%.4f, sd=%.5f, min=%.4f, max=%.4f' % (
-        a, np.nanmean(r), np.nanstd(r), np.nanmin(r), np.nanmax(r)
-    ))
-
-def summarise_gdp_data(data):
-    print('gdp_data - all years:')
-    for a, R in data:
-        pnt_summary_stats(a, DataLoader.fractional_diff(R, axis=0))
-
-def summarise_simulations(results):
-    print('simulation_results - all years:')
-    for a, S, _, _ in simulation_results:
-        pnt_summary_stats(a, DataLoader.fractional_diff(S.simulate, axis=1))
-
-    for y in (1, 19):
-        print('simulation_results - year %i:' % y)
-        for a, S, _, _ in simulation_results:
-            R_d = DataLoader.fractional_diff(S.simulate, axis=1)
-            pnt_summary_stats(a, R_d[:, y-1])
-
-    for a, S, R, dates in simulation_results:
-        PlottingTools.plot_prediction_cone(a, S, R, dates)
+from scripts.simulation_summariser import (
+    summarise_gdp_data, summarise_simulations
+)
 
 
 # correlated_sectors_model = fit_correlated_sectors_model()
@@ -58,7 +34,7 @@ correlated_sectors_sim = SimulationContainer(
     simulator=GDPSimulatorWithCorrelatedSectors,
     values_deltas_pair=load_gva_pc_d(),
     load_parameters=True,
-    n_years=N_YEARS, n_iter=N_ITER
+    n_years=settings.N_YEARS, n_iter=settings.N_ITER
 )
 correlated_sectors_sim.simulate()
 
@@ -70,7 +46,7 @@ international_shared_variance_sim = SimulationContainer(
     simulator=SharedVarianceInternationalGDPSimulator,
     values_deltas_pair=(X['Australia'], D['Australia']),
     load_parameters=True,
-    n_years=N_YEARS, n_iter=N_ITER
+    n_years=settings.N_YEARS, n_iter=settings.N_ITER
 )
 international_shared_variance_sim.simulate()
 
@@ -82,7 +58,7 @@ simple_australian_simulation = SimulationContainer(
     simulator=SimpleSimulator,
     values_deltas_pair=load_gdp_pc_d(),
     load_parameters=True,
-    n_years=N_YEARS, n_iter=N_ITER
+    n_years=settings.N_YEARS, n_iter=settings.N_ITER
 )
 simple_australian_simulation.simulate()
 
@@ -92,10 +68,10 @@ X, D = load_un_gdp_pc_d()
 simple_internation_simulation = SimulationContainer(
     name='Simple Internation Simulation',
     folder='simple_international_model',
-    simulator=SimpleSimulator,
+    simulator=CommonDistrubutionSimulator,
     values_deltas_pair=(X['Australia'], D['Australia']),
     load_parameters=True,
-    n_years=N_YEARS, n_iter=N_ITER
+    n_years=settings.N_YEARS, n_iter=settings.N_ITER
 )
 simple_internation_simulation.simulate()
 
