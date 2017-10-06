@@ -47,7 +47,10 @@ class SimulationContainer(object):
         )
 
     def plot_sim(self):
-        plt.figure(figsize=(20, 10))
+        fig = plt.figure(figsize=(7, 6))
+        ax = fig.add_subplot(111)
+        ax.set_ylabel('GDP (AUD) per capita')
+        plt.title('Simulation Traces')
 
         if self.values.values.ndim == 1:
             reduced_values = self.values.values

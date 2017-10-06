@@ -42,7 +42,7 @@ class PlottingTools():
 
         mean = S.simulate.mean(axis=0)
 
-        fig, ax = plt.subplots(figsize=(4, 3))
+        fig, ax = plt.subplots(figsize=(7, 6))
         ax.set_ylabel('GDP (AUD) per capita')
         cm = plt.get_cmap('Blues')
         plt.plot(dates, R)
@@ -62,7 +62,7 @@ class PlottingTools():
             # plt.plot(date_range, upper, color='b')
 
         PlottingTools.add_legend(fig, ax, cm, quantiles)
-        plt.title('Prediction Cone for %s' % a)
+        plt.title('Bayesian Prediction Cone')
         plt.savefig(os.path.join(
             settings.OUTPUTS_DIR,
             S.folder,
