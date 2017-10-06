@@ -225,7 +225,7 @@ def simple_australian_model_fn(y, iters, tune_iters):
     return model, mt
 
 
-def simple_international_model_fn(Y, iters, tune_iters, filter_nans):
+def simple_international_model_fn(Y, iters, tune_iters):
     # Hierarchical National GDP Model:
     #  - common distribution for mean and variation of national gdp growth; and
     #  - distribution for each nations gdp growth.
@@ -234,13 +234,10 @@ def simple_international_model_fn(Y, iters, tune_iters, filter_nans):
         mu = pm.Normal('mu', 0, 1e6)
         sd = pm.InverseGamma('sd', alpha=1, beta=1)
 
-        if not filter_nans:
-            Y_hat = pm.Normal('Y', mu, sd, observed=Y, shape=Y.shape[1])
-        elif filter_nans:
-            Y_hat = [
-                pm.Normal('y%i' % i, mu, sd, observed=Y[:, i][np.isfinite(Y[:, i])])
-                for i in range(Y.shape[1])
-            ]
+        Y_hat = [
+            pm.Normal('y%i' % i, mu, sd, observed=Y[:, i][np.isfinite(Y[:, i])])
+            for i in range(Y.shape[1])
+        ]
 
         step = pm.Metropolis()
         trace = pm.sample(
@@ -260,7 +257,6 @@ def international_shared_variance_model_fn(
         MU = pm.Normal('mu', 0, 1e6, shape=Y.shape[1])
         sd = pm.InverseGamma('sd', alpha=1, beta=1)
 
-        # Always filter nans
         Y_hat = [
             pm.Normal('y%i' % i, MU[i], sd, observed=Y[:, i][np.isfinite(Y[:, i])])
             for i in range(Y.shape[1])
