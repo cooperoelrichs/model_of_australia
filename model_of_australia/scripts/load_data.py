@@ -46,14 +46,17 @@ def load_gdp_pc_d():
     gdp_pc_d_by_date = make_date_indexed(gva_pc_d[['gdp', 'date']])
     return gdp_pc_data_by_date, gdp_pc_d_by_date
 
-def load_all_gva_data():
-    gva_data = DataLoader.read_data_file(DATA_SPECS['abs_gva'])
-
+def get_gva_category_names():
     gva_abs_full_names = set([
         (c, e) for _, b, c, _, e in DATA_SPECS['abs_gva']['gva_data_classifications']
         if b is not None and b is True
     ])
     gva_categories = [a for a, _ in gva_abs_full_names]
+    return gva_categories
+
+def load_all_gva_data():
+    gva_data = DataLoader.read_data_file(DATA_SPECS['abs_gva'])
+    gva_categories = get_gva_category_names()
 
     abs_pop = load_abs_pop()
 
