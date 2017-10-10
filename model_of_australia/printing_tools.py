@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa import stattools
 from statsmodels.stats.diagnostic import het_arch
 
-from plotting_tools import PlottingTools
+from model_of_australia.plotting_tools import PlottingTools
 
 
 class PrintingTools():

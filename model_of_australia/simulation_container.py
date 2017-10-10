@@ -1,15 +1,15 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from model_container import ModelContainer
-from scripts import settings
+from model_of_australia.model_container import ModelContainer
 
 
 class SimulationContainer(object):
-    def __init__(self, name, folder, values_deltas_pair, simulator,
+    def __init__(self, name, folder, outputs_dir, values_deltas_pair, simulator,
                  n_years, n_iter, parameters=None, load_parameters=False):
         self.name = name
         self.folder = folder
+        self.outputs_dir = outputs_dir
         self.simulator = simulator
 
         self.values = values_deltas_pair[0]
@@ -19,7 +19,9 @@ class SimulationContainer(object):
         self.n_iter = n_iter
 
         if parameters is None and load_parameters is True:
-            self.parameters = ModelContainer.load_parameters(self.folder)
+            self.parameters = ModelContainer.load_parameters(
+                self.folder, self.outputs_dir
+            )
         elif parameters is not None and load_parameters is False:
             self.parameters = parameters
         else:
@@ -62,7 +64,7 @@ class SimulationContainer(object):
         plt.plot(self.values.index, reduced_values)
         plt.plot(self.make_date_range(), self.simulate.T)
         file_path = os.path.join(
-            settings.OUTPUTS_DIR,
+            self.outputs_dir,
             self.folder,
             'simulation_plot.png'
         )

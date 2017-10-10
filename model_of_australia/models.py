@@ -10,8 +10,8 @@ import theano
 import theano.tensor as tt
 theano.config.gcc.cxxflags = "-fbracket-depth=1024" # default is 256
 
-from printing_tools import PrintingTools
-from data_loader import DataLoader
+from model_of_australia.printing_tools import PrintingTools
+from model_of_australia.data_loader import DataLoader
 
 # ITERS = 1e4
 # TUNE_ITERS = 2e3
