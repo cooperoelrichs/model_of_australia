@@ -1,11 +1,11 @@
 import os
 import sys
-sys.path.insert(0, "../")
+sys.path.insert(0, ".")
 
 import numpy as np
 
-from plotting_tools import PlottingTools
-from data_loader import DataLoader
+from model_of_australia.plotting_tools import PlottingTools
+from model_of_australia.data_loader import DataLoader
 
 
 def pnt_summary_stats(a, r):

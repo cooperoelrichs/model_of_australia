@@ -1,19 +1,18 @@
 import os
 import sys
-sys.path.insert(0, "../")
+sys.path.insert(0, ".")
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from data_loader import DataLoader
-from printing_tools import PrintingTools
-from data_tools import DataTools
-from scripts import settings
+from model_of_australia.data_loader import DataLoader
+from model_of_australia.printing_tools import PrintingTools
+from model_of_australia.data_tools import DataTools
 
 
 DATA_SPECS = DataLoader.load_specs(
-    '../data_specs',
+    'data_specs',
     {
         'abs_cpi': 'abs_cpi.json',
         'abs_gdp': 'abs_gdp.json',

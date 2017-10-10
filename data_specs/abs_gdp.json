@@ -1,7 +1,7 @@
 {
     "name": "abs_gdp",
     "params": {
-        "filepath_or_buffer": "../../data/income_from_gdp_inventories_annual.csv",
+        "filepath_or_buffer": "data/income_from_gdp_inventories_annual.csv",
         "header": 0,
         "skiprows": [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "dtype": null

@@ -1,7 +1,7 @@
 {
     "name": "abs_gva",
     "params": {
-        "filepath_or_buffer": "../../data/industry_gross_value_added_annual.csv",
+        "filepath_or_buffer": "data/industry_gross_value_added_annual.csv",
         "header": 0,
         "skiprows": [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "dtype": null
