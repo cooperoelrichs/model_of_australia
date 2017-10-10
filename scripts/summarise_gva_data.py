@@ -5,7 +5,7 @@ sys.path.insert(0, ".")
 import matplotlib.pyplot as plt
 # plt.style.use('seaborn-whitegrid')
 
-from data_loader import DataLoader
+from model_of_australia.data_loader import DataLoader
 from scripts.load_data import (
     DATA_SPECS,
     load_all_gva_data, get_gva_category_names

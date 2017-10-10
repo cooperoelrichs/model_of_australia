@@ -5,22 +5,24 @@ from scipy import stats
 
 import numpy as np
 
-from simulation_container import SimulationContainer
-from plotting_tools import PlottingTools
-from data_loader import DataLoader
+from model_of_australia.simulation_container import SimulationContainer
+from model_of_australia.plotting_tools import PlottingTools
+from model_of_australia.data_loader import DataLoader
+from model_of_australia.simulators import GDPSimulatorWithCorrelatedSectors
+
 from scripts.load_data import load_gva_pc_d, load_gdp_pc_d, load_un_gdp_pc_d
 from scripts import settings
 from scripts.fit_models import fit_correlated_sectors_model
 from scripts.simulation_summariser import (
     summarise_gdp_data, summarise_simulations
 )
-from simulators import GDPSimulatorWithCorrelatedSectors
 
 
 correlated_sectors_model = fit_correlated_sectors_model()
 correlated_sectors_sim = SimulationContainer(
     name='Correlated Sectors Simulation',
     folder='correlated_sectors_model',
+    outputs_dir=settings.OUTPUTS_DIR,
     simulator=GDPSimulatorWithCorrelatedSectors,
     values_deltas_pair=load_gva_pc_d(),
     load_parameters=True,

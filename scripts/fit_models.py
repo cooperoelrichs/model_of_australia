@@ -56,7 +56,8 @@ def fit_international_shared_variance_model():
         load_un_gdp_pc_d()[1],
     )
     ModelContainer.save_parameters(
-        parameters, international_shared_variance_model.folder
+        parameters, international_shared_variance_model.folder,
+        settings.OUTPUTS_DIR
     )
     international_shared_variance_model.parameters = parameters
     return international_shared_variance_model
@@ -78,7 +79,6 @@ def fit_simple_international_model():
         model_fn=simple_international_model_fn,
         data=load_un_gdp_pc_d()[1].values,
         parameter_spec=[(0, 'mu', stats.norm), (0, 'sd', stats.invgamma)],
-        fn_args={'filter_nans':True},
         outputs_dir=settings.OUTPUTS_DIR
     )
     simple_international_model.run()
