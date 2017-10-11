@@ -78,7 +78,8 @@ class SharedVarianceInternationalGDPSimulator():
     def simulate(init_gdp, n_years, n_iter, params):
         gdp_sim = np.empty((n_iter, n_years))
         for i in range(n_iter):
-            mu = params['mu_australia'][0][2].rvs(*params['mu_australia'][0][1])
+            # mu = params['mu_australia'][0][2].rvs(*params['mu_australia'][0][1])
+            mu = params['y_australia'][0][1][0]
             sd = params['sd'][0][2].rvs(*params['sd'][0][1])
             deltas = stats.norm.rvs(mu, sd, size=n_years)
 

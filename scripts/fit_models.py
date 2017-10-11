@@ -42,16 +42,27 @@ def fit_correlated_sectors_model():
     return correlated_sectors_model
 
 def fit_international_shared_variance_model():
+    Y = load_un_gdp_pc_d()[1].values
     international_shared_variance_model = ModelContainer(
         name='International Shared Variance Model',
         folder='international_shared_variance_model',
         model_fn=international_shared_variance_model_fn,
-        data=load_un_gdp_pc_d()[1].values,
-        parameter_spec=[(1, 'mu', stats.norm), (0, 'sd', stats.invgamma)],
+        data=Y,
+        parameter_spec=[
+            (0, 'y%i' % i, stats.norm) for i in range(Y.shape[1])
+        ] + [(0, 'sd', stats.invgamma)],
         outputs_dir=settings.OUTPUTS_DIR
     )
-    international_shared_variance_model.run()
-    parameters = extract_mu_for_australia(
+    # international_shared_variance_model.run()
+    international_shared_variance_model.results = international_shared_variance_model.fit_model()
+    international_shared_variance_model.parameters = international_shared_variance_model.calculate_parameters()
+    ModelContainer.save_parameters(
+        international_shared_variance_model.parameters,
+        international_shared_variance_model.folder,
+        international_shared_variance_model.outputs_dir
+    )
+
+    parameters = extract_dist_for_australia(
         international_shared_variance_model.parameters,
         load_un_gdp_pc_d()[1],
     )
@@ -61,6 +72,11 @@ def fit_international_shared_variance_model():
     )
     international_shared_variance_model.parameters = parameters
     return international_shared_variance_model
+
+def extract_dist_for_australia(parameters, data):
+    aust_i = np.where(data.columns == 'Australia')[0][0]
+    parameters['y_australia'] = parameters['y%i' % aust_i]
+    return parameters
 
 def extract_mu_for_australia(parameters, data):
     parameters['mu_australia'] = [

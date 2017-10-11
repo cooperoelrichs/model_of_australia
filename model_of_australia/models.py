@@ -254,17 +254,19 @@ def international_shared_variance_model_fn(
     Y, iters, tune_iters
 ):
     with pm.Model() as model:
-        MU = pm.Normal('mu', 0, 1e6, shape=Y.shape[1])
+        # MU = pm.Normal('mu', 0, 1e6, shape=Y.shape[1])
         sd = pm.InverseGamma('sd', alpha=1, beta=1)
 
         Y_hat = [
-            pm.Normal('y%i' % i, MU[i], sd, observed=Y[:, i][np.isfinite(Y[:, i])])
+            # pm.Normal('y%i' % i, MU[i], sd, observed=Y[:, i][np.isfinite(Y[:, i])])
+            pm.Normal('y%i' % i, 0, sd, observed=Y[:, i][np.isfinite(Y[:, i])])
             for i in range(Y.shape[1])
         ]
 
         step = pm.Metropolis()
         trace = pm.sample(
             int(iters),
+            trace=[a for a in Y_hat] + [sd],
             tune=int(tune_iters),
             step=step,
             njobs=4,
