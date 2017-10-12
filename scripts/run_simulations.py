@@ -4,14 +4,6 @@ sys.path.insert(0, ".")
 from scipy import stats
 import numpy as np
 
-# import model_of_australia
-# print(model_of_australia)
-# print(dir(model_of_australia))
-#
-# from model_of_australia import scripts
-# print(scripts)
-# print(dir(scripts))
-
 from model_of_australia.simulation_container import SimulationContainer
 from model_of_australia.plotting_tools import PlottingTools
 from model_of_australia.data_loader import DataLoader
