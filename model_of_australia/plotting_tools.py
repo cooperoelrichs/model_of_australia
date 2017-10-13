@@ -7,8 +7,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from scipy import stats
 
-from scripts import settings
-
 
 class PlottingTools():
     def density_plot(y, lims, color=None, linewidth=1):
@@ -33,38 +31,63 @@ class PlottingTools():
         )  # facecolor='white'
         lg.get_frame().set_facecolor('white')
 
-    def plot_prediction_cone(a, S, R, dates):
+    def make_future_date_range(dates, future_years):
         last_date = pd.DatetimeIndex(dates).max()
-        date_range = pd.to_datetime(
+        return pd.to_datetime(
             ['%i-%i-1' % (y, last_date.month)
-            for y in range(last_date.year+1, last_date.year+21)]
+            for y in range(last_date.year+1, last_date.year+(future_years+1))]
         )
 
-        mean = S.simulate.mean(axis=0)
-
-        fig, ax = plt.subplots(figsize=(7, 6))
-        ax.set_ylabel('GDP (AUD) per capita')
-        cm = plt.get_cmap('Blues')
-        plt.plot(dates, R)
-        # plt.plot(date_range, mean, color='k', lw=1)
-
+    def plot_prediction_cone_on_axis(sim, date_range, fig, ax, cm):
         quantiles = [0.99, 0.9, 0.5, 0.1]
-        # quantiles = np.linspace(0.98, 0, 50)
         for q in quantiles:
             p = q*100/2
             p1, p2 = 50-p, 50+p
 
-            lower = np.percentile(S.simulate, p1, axis=0)
-            upper = np.percentile(S.simulate, p2, axis=0)
+            lower = np.percentile(sim.simulate, p1, axis=0)
+            upper = np.percentile(sim.simulate, p2, axis=0)
             ax.fill_between(date_range, lower, upper, color=cm((1-q)))
 
-            # plt.plot(date_range, lower, color='b')
-            # plt.plot(date_range, upper, color='b')
-
         PlottingTools.add_legend(fig, ax, cm, quantiles)
+
+    def prediction_cone_cmap():
+        return plt.get_cmap('Blues')
+
+    def plot_prediction_cone(S, R, dates, ylabel, outputs_dir):
+        fig, ax = plt.subplots(figsize=(7, 6))
+        ax.set_ylabel(ylabel)  # 'GDP (AUD) per capita'
+        cm = PlottingTools.prediction_cone_cmap()
+        plt.plot(dates, R)
+
+        date_range = PlottingTools.make_future_date_range(dates, 20)
+        PlottingTools.plot_prediction_cone_on_axis(S, date_range, fig, ax, cm)
+
         plt.title('Bayesian Prediction Cone')
+        plt.savefig(os.path.join(outputs_dir, S.folder, 'prediction cone.png'))
+
+    def prediction_cone_comparison_plot(
+        simulations, data_sets, output_folder
+    ):
+        fig, axes = plt.subplots(1, 4, sharey=True, figsize=(14, 5))
+        axes[0].set_ylabel('GDP per capita')
+        cm = PlottingTools.prediction_cone_cmap()
+
+        for i, sim in enumerate(simulations):
+            ax = axes[i]
+            R, dates, currency = data_sets[i]
+
+            num_r = 10
+            ax.plot(dates[-num_r:], R[-num_r:])
+            ax.set_title('%s (%s)' % (sim.name, currency), fontsize=10)
+            ax.tick_params(axis='x', labelsize=11)
+
+            date_range = PlottingTools.make_future_date_range(dates, 20)
+            PlottingTools.plot_prediction_cone_on_axis(
+                sim, date_range, fig, ax, cm
+            )
+
+        fig.suptitle('Bayesian Prediction Cones')
+        fig.autofmt_xdate()
         plt.savefig(os.path.join(
-            settings.OUTPUTS_DIR,
-            S.folder,
-            'prediction cone.png'
+            output_folder, 'prediction-cone-comparison.png'
         ))

@@ -29,17 +29,16 @@ class SimulationContainer(object):
                 'Must either provide parameters or set load_parameters to True.'
             )
 
-    def simulate(self):
-        self.simulate = self.run()
+    def run_and_plot(self):
+        self.run()
         self.plot_sim()
 
     def run(self):
-        simulation = self.simulator.run(
+        self.simulate = self.simulator.run(
             self.values.values,
             self.parameters,
             self.n_years, self.n_iter
         )
-        return simulation
 
     def make_date_range(self):
         return pd.date_range(
