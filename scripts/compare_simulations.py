@@ -6,6 +6,7 @@ import numpy as np
 
 from model_of_australia.simulation_container import SimulationContainer
 from model_of_australia.data_loader import DataLoader
+from model_of_australia.plotting_tools import PlottingTools
 from model_of_australia.simulators import (
     GDPSimulatorWithCorrelatedSectors,
     SharedVarianceInternationalGDPSimulator,
@@ -25,25 +26,29 @@ specs = [
         'simple_australian',
         'Simple Australian Simulation',
         SimpleSimulator,
-        load_gdp_pc_d()
+        load_gdp_pc_d(),
+        'AUD'
     ),
     (
         'correlated_sectors',
         'Correlated Sectors Simulation',
         GDPSimulatorWithCorrelatedSectors,
-        load_gva_pc_d()
+        load_gva_pc_d(),
+        'AUD'
     ),
     (
         'simple_international',
         'Simple International Simulation',
         CommonDistrubutionSimulator,
-        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia'])
+        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia']),
+        'USD'
     ),
     (
         'international_shared_variance',
         'International Shared Variance Simulation',
         SharedVarianceInternationalGDPSimulator,
-        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia'])
+        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia']),
+        'USD'
     ),
 ]
 
@@ -57,27 +62,44 @@ containers = [
         load_parameters=True,
         n_years=settings.N_YEARS, n_iter=settings.N_ITER
     )
-    for name, title, simulator, data_pair in specs
+    for name, title, simulator, data_pair, _ in specs
 ]
 
-simulations = [
-    (container.name, container.run())
-    for container in containers
-]
+for container in containers:
+    container.run()
 
 def print_summary(name, X, axis):
     D = DataLoader.fractional_diff(X, axis=axis)
     print('%s & %.4f & %.4f \\\\' % (name, np.nanmean(D), np.nanstd(D)))
 
-print('Name & Mean & Std. \\\\\n\\hline')
-print_summary('Australia - ABS Data', load_gdp_pc_d()[0]['gdp'].values, 0)
-print_summary('Australia - UN Data', X_un_gdp_pc['Australia'].values, 0)
-print_summary('All Nations - UN Data', X_un_gdp_pc.values, 0)
-print('\\hline')
+def print_tex_summary_table(simulations):
+    X_un_gdp_pc, D_un_gdp_pc = load_un_gdp_pc_d()
+    print('Name & Mean & Std. \\\\\n\\hline')
+    print_summary('Australia - ABS Data', load_gdp_pc_d()[0]['gdp'].values, 0)
+    print_summary('Australia - UN Data', X_un_gdp_pc['Australia'].values, 0)
+    print_summary('All Nations - UN Data', X_un_gdp_pc.values, 0)
+    print('\\hline')
 
-# max_n = max([len(t) for t, _ in simulations])
-for name, X in simulations:
-    # s = ' ' * (max_n - len(name))
-    print_summary(name, X, 1)
+    for sim in simulations:
+        print_summary(sim.name, sim.simulate, 1)
 
+def maybe_sum(X):
+    if X.ndim == 1:
+        return X
+    elif X.ndim == 2:
+        return X.sum(axis=1)
+    else:
+        raise RuntimeError('%i dimensional arrays are not supported' % X.ndim)
+
+# print_tex_summary_table(containers)
+data_sets = [
+    (maybe_sum(data_pair[0].values), data_pair[0].index, currency)
+    for _, _, _, data_pair, currency in specs
+]
+
+PlottingTools.prediction_cone_comparison_plot(
+    containers,
+    data_sets,
+    os.path.join(settings.OUTPUTS_DIR, 'comparisons')
+)
 print('Done.')
