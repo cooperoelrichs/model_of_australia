@@ -51,6 +51,7 @@ class DataLoader():
             raw[spec['date_spec']['col']].values,
             format=spec['date_spec']['format']
         )
+        raw = raw.drop(spec['date_spec']['col'], axis=1)
 
         raw[spec['dollar_columns']] = (
             raw[spec['dollar_columns']] * spec['dollar_conversion']
@@ -59,7 +60,7 @@ class DataLoader():
         raw = raw.sort_values(by='date')
         raw = raw.reindex(index=range(len(raw)))
         data = DataLoader.maybe_process_data(raw, spec)
-        return raw
+        return data
 
     def maybe_process_data(raw, spec):
         processed_data_spec = spec['processed-data-spec']
@@ -147,17 +148,31 @@ class DataLoader():
         rawT = rawT.sort_values(by='date')
         rawT = rawT.reindex(index=range(len(rawT)))
 
-        if spec['spec-values'] is not None:
-            values = [(a, rawT[b].astype(np.float64)) for a, b in spec['spec-values']]
-        else:
-            values = [(a, rawT[a].astype(np.float64)) for a in rawT.columns.difference(['date']).values]
-
-        if spec['spec-deltas'] is not None:
-            deltas = [(a, make_delta(rawT, b, c)) for a, b, c in spec['spec-deltas']]
-        else:
-            deltas = []
-
-        data = pd.DataFrame(
-            data=dict(values + deltas + [('date', rawT['date'])])
+        rawT = pd.DataFrame(
+            data=dict(
+                [
+                    (a, rawT[a].astype(np.float64))
+                    for a in rawT.columns.difference(['date']).values
+                ] +
+                [('date', rawT['date'])]
+            )
         )
+
+        data = DataLoader.maybe_process_data(rawT, spec)
+        return data
+
+    def convert_to_aud(data, spec):
+        return DataLoader.perform_conversion(
+            data, spec, 'aud-currency-conversion-factor'
+        )
+
+    def convert_chain_volumes_to_constant_prices(data, spec):
+        return DataLoader.perform_conversion(
+            data, spec, 'chain-volume-conversion-factor'
+        )
+
+    def perform_conversion(data, spec, factor_name):
+        factor = spec[factor_name]
+        print('Conversion: %s; %.4f' % (factor_name, factor))
+        data[data.columns.difference(['date'])] *= factor
         return data

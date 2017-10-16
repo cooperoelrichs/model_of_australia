@@ -67,15 +67,16 @@ def load_all_gva_data():
     gva_pc_data = gva_data[
         gva_data.columns.difference(['date'])
     ].divide(
-        abs_pop['value'][date_filter].values, axis=0
+        abs_pop['value'][date_filter].values,
+        axis=0
     )
+
     gva_pc_data['date'] = gva_data['date']
     gva_pc_data = gva_pc_data[15:]
 
     gva_pc_d = DataLoader.make_fractional_diff(
         gva_pc_data, gva_pc_data.columns.difference(['date'])
     )
-
     return gva_pc_data, gva_pc_d, gva_categories
 
 def load_abs_pop():
@@ -99,6 +100,15 @@ def load_un_gdp_pc_d():
     un_gdp_pc_data = DataLoader.read_transposed_data_file(
         DATA_SPECS['un_gdppc']
     )
+
+    DataLoader.convert_to_aud(
+        un_gdp_pc_data, DATA_SPECS['un_gdppc']
+    )
+
+    DataLoader.convert_chain_volumes_to_constant_prices(
+        un_gdp_pc_data, DATA_SPECS['un_gdppc']
+    )
+
     un_gdp_pc_d = DataLoader.make_fractional_diff(
         un_gdp_pc_data, un_gdp_pc_data.columns.difference(['date'])
     )
