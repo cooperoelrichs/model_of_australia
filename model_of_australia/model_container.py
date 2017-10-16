@@ -3,6 +3,7 @@ import numpy as np
 import json
 from scipy import stats
 from model_of_australia.models import ModelPostProcessor, ModelSummariser
+from model_of_australia.data_loader import DataLoader
 
 
 class ModelContainer(object):
@@ -56,15 +57,13 @@ class ModelContainer(object):
 
     def save_parameters(parameters, folder, outputs_dir):
         string_parameters = ModelContainer.make_json_ready(parameters)
-        with open(ModelContainer.parameters_file_path(folder, outputs_dir), 'w') as f:
+        directory = os.path.join(outputs_dir, folder)
+        DataLoader.maybe_make_dir(directory)
+        with open(ModelContainer.parameters_file_path(directory), 'w') as f:
             json.dump(string_parameters, f, indent=4)
 
-    def parameters_file_path(folder_name, outputs_dir):
-        return os.path.join(
-            outputs_dir,
-            folder_name,
-            'parameters.json'
-        )
+    def parameters_file_path(directory):
+        return os.path.join(directory, 'parameters.json')
 
     def make_json_ready(parameters):
         string_parameters = {}
@@ -101,6 +100,9 @@ class ModelContainer(object):
             return stats.invgamma
 
     def load_parameters(folder_name, outputs_dir):
-        with open(ModelContainer.parameters_file_path(folder_name, outputs_dir), 'r') as f:
+        fp = ModelContainer.parameters_file_path(
+            os.path.join(outputs_dir, folder_name)
+        )
+        with open(fp, 'r') as f:
             string_parameters = json.load(f)
         return ModelContainer.unmake_json_ready(string_parameters)
