@@ -58,6 +58,18 @@ class DataLoader():
 
         raw = raw.sort_values(by='date')
         raw = raw.reindex(index=range(len(raw)))
+        data = DataLoader.maybe_process_data(raw, spec)
+        return raw
+
+    def maybe_process_data(raw, spec):
+        processed_data_spec = spec['processed-data-spec']
+        if processed_data_spec is None:
+            return raw
+        else:
+            return DataLoader.process_data(raw, processed_data_spec)
+        return
+
+    def process_data(raw, spec):
         values = [(a, raw[b]) for a, b in spec['spec-values']]
         deltas = [
             (a, DataLoader.make_delta(raw, b, c))
