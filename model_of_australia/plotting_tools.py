@@ -66,19 +66,19 @@ class PlottingTools():
         plt.savefig(os.path.join(outputs_dir, S.folder, 'prediction cone.png'))
 
     def prediction_cone_comparison_plot(
-        simulations, data_sets, output_folder
+        simulations, data_sets, currency, output_folder
     ):
         fig, axes = plt.subplots(1, 4, sharey=True, figsize=(14, 5))
-        axes[0].set_ylabel('GDP per capita')
+        axes[0].set_ylabel('GDP per capita (%s)' % currency)
         cm = PlottingTools.prediction_cone_cmap()
 
         for i, sim in enumerate(simulations):
             ax = axes[i]
-            R, dates, currency = data_sets[i]
+            R, dates = data_sets[i]
 
             num_r = 10
             ax.plot(dates[-num_r:], R[-num_r:])
-            ax.set_title('%s (%s)' % (sim.name, currency), fontsize=10)
+            ax.set_title('%s' % sim.name, fontsize=10)
             ax.tick_params(axis='x', labelsize=11)
 
             date_range = PlottingTools.make_future_date_range(dates, 20)

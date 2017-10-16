@@ -13,6 +13,12 @@ from model_of_australia.simulators import (
     SimpleSimulator,
     CommonDistrubutionSimulator
 )
+from scripts.fit_models import (
+    fit_international_shared_variance_model,
+    fit_correlated_sectors_model,
+    fit_simple_australian_model,
+    fit_simple_international_model
+)
 
 from scripts import settings
 from scripts.load_data import (
@@ -26,29 +32,25 @@ specs = [
         'simple_australian',
         'Simple Australian Simulation',
         SimpleSimulator,
-        load_gdp_pc_d(),
-        'AUD'
+        load_gdp_pc_d()
     ),
     (
         'correlated_sectors',
         'Correlated Sectors Simulation',
         GDPSimulatorWithCorrelatedSectors,
-        load_gva_pc_d(),
-        'AUD'
+        load_gva_pc_d()
     ),
     (
         'simple_international',
         'Simple International Simulation',
         CommonDistrubutionSimulator,
-        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia']),
-        'USD'
+        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia'])
     ),
     (
         'international_shared_variance',
         'International Shared Variance Simulation',
         SharedVarianceInternationalGDPSimulator,
-        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia']),
-        'USD'
+        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia'])
     ),
 ]
 
@@ -62,7 +64,7 @@ containers = [
         load_parameters=True,
         n_years=settings.N_YEARS, n_iter=settings.N_ITER
     )
-    for name, title, simulator, data_pair, _ in specs
+    for name, title, simulator, data_pair in specs
 ]
 
 for container in containers:
@@ -93,13 +95,14 @@ def maybe_sum(X):
 
 # print_tex_summary_table(containers)
 data_sets = [
-    (maybe_sum(data_pair[0].values), data_pair[0].index, currency)
-    for _, _, _, data_pair, currency in specs
+    (maybe_sum(data_pair[0].values), data_pair[0].index)
+    for _, _, _, data_pair in specs
 ]
 
 PlottingTools.prediction_cone_comparison_plot(
     containers,
     data_sets,
+    'AUD - Chain Volumes',
     os.path.join(settings.OUTPUTS_DIR, 'comparisons')
 )
 print('Done.')
