@@ -14,5 +14,6 @@
     "dollar_columns": [],
     "dollar_conversion": 1e6,
     "spec-values": [["value", "New Cash Rate Target"]],
-    "spec-deltas": [["delta", "existing", "Change in Cash Rate Target"]]
+    "spec-deltas": [["delta", "existing", "Change in Cash Rate Target"]],
+    "source": null
 }

@@ -6,10 +6,10 @@
         "skiprows": [1, 2, 3, 4, 5, 6, 7, 8, 9],
         "dtype": null
     },
+    "source": null,
     "date_spec": {"col": "Unnamed: 0", "format": "%b-%Y"},
     "dollar_columns_constructor": ["gva_data_classifications", "[e for _, _, _, _, e in gva_data_classifications]"],
     "dollar_conversion": 1e6,
-
     "dollar_columns": [
         "Agriculture, forestry and fishing (A) ;  Agriculture ;",
         "Agriculture, forestry and fishing (A) ;  Forestry and fishing ;",
@@ -59,7 +59,6 @@
         "Statistical discrepancy (P) ;",
         "GROSS DOMESTIC PRODUCT ;"
     ],
-
     "spec-values_constructor": ["gva_data_classifications", "[[d, e] for _, _, _, d, e in gva_data_classifications]"],
     "spec-deltas": [["delta", "calculated", "GROSS DOMESTIC PRODUCT ;"]],
     "spec-values": [
@@ -112,7 +111,6 @@
         ["gdp", "GROSS DOMESTIC PRODUCT ;"],
         ["value", "GROSS DOMESTIC PRODUCT ;"]
     ],
-
     "gva_data_classifications": [
         ["a", false, "agriculture", "agriculture-agriculture", "Agriculture, forestry and fishing [A] ;  Agriculture ;"],
         ["a", false, "agriculture", "agriculture-forestry-fishing", "Agriculture, forestry and fishing [A] ;  Forestry and fishing ;"],

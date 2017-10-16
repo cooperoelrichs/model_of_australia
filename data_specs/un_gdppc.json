@@ -1,7 +1,7 @@
 {
     "name": "un_gdp_pc_data",
     "params": {
-        "filepath_or_buffer": "data/un-GDPPCconstan-countries.csv",
+        "filepath_or_buffer": "data/un-gdp-pc-constant-prices.csv",
         "header": 0,
         "skiprows": [0, 1],
         "dtype": null
@@ -10,5 +10,6 @@
     "spec-values": null,
     "spec-deltas": null,
     "column_names": "Country",
+    "aud-conversion-factor": 1.309473,
     "source": "https://unstats.un.org/unsd/snaama/dnlList.asp"
 }

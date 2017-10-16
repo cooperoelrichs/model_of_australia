@@ -10,5 +10,6 @@
     "dollar_columns": ["GROSS DOMESTIC PRODUCT ;"],
     "dollar_conversion": 1e6,
     "spec-values": [["value", "GROSS DOMESTIC PRODUCT ;"]],
-    "spec-deltas": [["delta", "calculated", "GROSS DOMESTIC PRODUCT ;"]]
+    "spec-deltas": [["delta", "calculated", "GROSS DOMESTIC PRODUCT ;"]],
+    "source": null
 }

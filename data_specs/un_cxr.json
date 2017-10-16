@@ -1,0 +1,17 @@
+{
+    "name": "un_currency_exchange_rates",
+    "params": {
+        "filepath_or_buffer": "data/un-currency-exchange-rates.csv",
+        "header": 0,
+        "skiprows": null,
+        "dtype": null
+    },
+    "date_spec": {"col": "Country-Currency-Measure", "format": "%Y"},
+    "processed-data-spec": null,
+    "column_names": "Country",
+    "dollar_columns": [],
+    "dollar_conversion": null,
+    "aud-column": "Australia-Australian Dollar-IMF based exchange rate",
+    "base-year-date": "2005-01-01",
+    "source": "United Nations National Accounts Main Data Aggregates Database, The file 'All countries for all years - sorted alphabetically' under Exchange Rates and Population, URL: https://unstats.un.org/unsd/snaama/dnlList.asp"
+}

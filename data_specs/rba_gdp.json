@@ -15,5 +15,6 @@
         ["value", "Real GDP"],
         ["nominal-value", "Nominal GDP"]
     ],
-    "spec-deltas": [["delta", "calculated", "Real GDP"]]
+    "spec-deltas": [["delta", "calculated", "Real GDP"]],
+    "source": null
 }
