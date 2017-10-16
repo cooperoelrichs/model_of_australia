@@ -14,6 +14,7 @@ def load_un_cxr_data():
 
     base_year = data[data['date'] == np.datetime64(spec['base-year-date'])]
     aud_exchange_rate = base_year[spec['aud-column']]
+    base_year[spec['aud-column']]
     print(aud_exchange_rate)
 
 
