@@ -10,9 +10,11 @@
         ],
         "dtype": null
     },
-    "spec-values": [["value", "Australia(e)"]],
-    "spec-deltas": [],
+    "processed-data-spec": {
+        "spec-values": [["value", "Australia(e)"]],
+        "spec-deltas": []
+    },
     "date_spec": {"from": 1, "to": null, "format": "%Y"},
     "column_names": "Unnamed: 0",
-    "source": "https://unstats.un.org/unsd/snaama/dnlList.asp"
+    "source": null
 }

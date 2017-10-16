@@ -7,9 +7,9 @@
         "dtype": null
     },
     "date_spec": {"from": 1, "to": null, "format": "%Y"},
-    "spec-values": null,
-    "spec-deltas": null,
+    "processed-data-spec": null,
     "column_names": "Country",
-    "aud-conversion-factor": 1.309473,
+    "aud-currency-conversion-factor": 1.309473,
+    "chain-volume-conversion-factor": 1.22328907282,
     "source": "https://unstats.un.org/unsd/snaama/dnlList.asp"
 }

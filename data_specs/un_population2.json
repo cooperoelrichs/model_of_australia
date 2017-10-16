@@ -9,9 +9,11 @@
     "date_spec": {"col": "Unnamed: 0", "format": "%b-%Y"},
     "dollar_columns": [],
     "dollar_conversion": null,
-    "spec-values": [
-        ["value", "Estimated Resident Population ;  Persons ;  Australia ;"]
-    ],
-    "spec-deltas": [],
+    "processed-data-spec": {
+        "spec-values": [
+            ["value", "Estimated Resident Population ;  Persons ;  Australia ;"]
+        ],
+        "spec-deltas": []
+    },
     "source": "https://unstats.un.org/unsd/snaama/dnlList.asp"
 }
