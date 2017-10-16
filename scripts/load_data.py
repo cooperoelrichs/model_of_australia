@@ -22,6 +22,7 @@ DATA_SPECS = DataLoader.load_specs(
         'rba_gdp': 'rba_gdp.json',
         'un_gdppc': 'un_gdppc.json',
         'un_population2': 'un_population2.json',
+        'un_cxr_data': 'un_cxr.json',
     }
 )
 
