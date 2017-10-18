@@ -43,15 +43,15 @@ class DataLoader():
 
     def read_data_file(spec):
         raw = pd.read_csv(**spec['params'])
-
         row_is_all_null_filter = raw.notnull().sum(axis=1)!=0
         raw = raw[row_is_all_null_filter]
 
-        raw['date'] = pd.to_datetime(
+        date_col = pd.to_datetime(
             raw[spec['date_spec']['col']].values,
             format=spec['date_spec']['format']
         )
         raw = raw.drop(spec['date_spec']['col'], axis=1)
+        raw['date'] = date_col
 
         raw[spec['dollar_columns']] = (
             raw[spec['dollar_columns']] * spec['dollar_conversion']
@@ -120,7 +120,7 @@ class DataLoader():
         return ld
 
     def make_fractional_diff(df, fields):
-        spec = {'date': df['date']}
+        spec = {'date': df['date'][1:]}
         for a in fields:
             spec[a] = DataLoader.fractional_diff(df[a].values, axis=0)
 

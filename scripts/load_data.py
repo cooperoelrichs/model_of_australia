@@ -23,6 +23,7 @@ DATA_SPECS = DataLoader.load_specs(
         'un_gdppc': 'un_gdppc.json',
         'un_population2': 'un_population2.json',
         'un_cxr_data': 'un_cxr.json',
+        'imf_gdp': 'imf_gdp.json',
     }
 )
 
@@ -33,6 +34,29 @@ def make_date_indexed(df):
         index=df['date'],
         columns=df[value_columns].columns
     )
+
+def load_imf_gdp_data():
+    imf_data = DataLoader.read_data_file(DATA_SPECS['imf_gdp'])
+    imf_data['gdp_d'] /= 100
+    abs_pop = load_abs_pop()
+
+    date_filter = (
+        abs_pop['date'] >= imf_data['date'].min()
+    ) & (
+        abs_pop['date'] <= imf_data['date'].max()
+    )
+
+    # imf_data['gdp_pc*'] = imf_data['gdp'].divide(abs_pop['value'][date_filter].values)
+    imf_data['gdp_d*'] = DataLoader.make_fractional_diff(
+        imf_data, ['gdp']
+    )['gdp']
+    imf_data['gdp_pc_d*'] = DataLoader.make_fractional_diff(
+        imf_data, ['gdp_pc']
+    )['gdp_pc']
+
+    imf_data = make_date_indexed(imf_data)
+    return imf_data
+
 
 def load_gva_pc_d():
     gva_pc_data, gva_pc_d, gva_categories = load_all_gva_data()
