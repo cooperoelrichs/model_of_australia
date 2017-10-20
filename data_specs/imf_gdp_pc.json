@@ -1,0 +1,14 @@
+{
+    "name": "imf_gdp_pc",
+    "params": {
+        "filepath_or_buffer": "data/imf-australia-gdp-pc-constant-prices.csv",
+        "header": 0,
+        "skiprows": [1, 2, 3, 4],
+        "dtype": null
+    },
+    "date_spec": {"col": "date", "format": "%Y"},
+    "dollar_columns": null,
+    "dollar_conversion": null,
+    "processed-data-spec": null,
+    "source": "http://www.imf.org/, World Economic Outlook Database, October 2017, http://www.imf.org/external/pubs/ft/weo/2017/02/weodata/weorept.aspx?sy=1980&ey=2022&scsm=1&ssd=1&sort=country&ds=.&br=0&pr1.x=13&pr1.y=10&c=193&s=NGDP_R%2CNGDP_RPCH%2CNGDPRPC&grp=0&a="
+}
