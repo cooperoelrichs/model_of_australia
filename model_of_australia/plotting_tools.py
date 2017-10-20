@@ -7,6 +7,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from scipy import stats
 
+from model_of_australia.data_loader import DataLoader
+
 
 class PlottingTools():
     def density_plot(y, lims, color=None, linewidth=1):
@@ -72,22 +74,35 @@ class PlottingTools():
         cm = PlottingTools.prediction_cone_cmap()
         return fig, axes, cm
 
-    def plot_single_prediction_cone(fig, ax, cm, R, dates, sim, max_date):
+    def plot_single_prediction_cone(fig, ax, cm, R, dates, sim, max_date, growth):
+        if growth:
+            R = DataLoader.fractional_diff(R, axis=0)
+            dates = dates[1:]
         ax.plot(dates, R)
         ax.set_title('%s' % sim.name, fontsize=10)
         ax.tick_params(axis='x', labelsize=11)
 
+
         date_range = PlottingTools.make_future_date_range(
             dates, sim.simulate.shape[1]
         )
+        if max_date is None:
+            max_date = date_range.max()
+
+        simulate = sim.simulate[:, date_range <= max_date]
+        if growth:
+            simulate = DataLoader.fractional_diff(simulate, axis=1)
+            date_range = date_range[1:]
+
         PlottingTools.plot_prediction_cone_on_axis(
-            sim.simulate[:, date_range <= max_date],
+            simulate,
             date_range[date_range <= max_date],
             fig, ax, cm
         )
 
     def prediction_cone_comparison_plot(
-        simulations, data_sets, currency, output_folder
+        simulations, data_sets, currency, output_folder,
+        max_date=None, growth=False
     ):
         fig, axes, cm = PlottingTools.comparison_plot_setup(
             len(simulations), 'GDP per capita (%s)' % currency
@@ -98,11 +113,19 @@ class PlottingTools():
 
             num_r = 10
             PlottingTools.plot_single_prediction_cone(
-                fig, ax, cm, R[-num_r:], dates[-num_r:], sim
+                fig, ax, cm, R[-num_r:], dates[-num_r:], sim,
+                max_date=max_date,
+                growth=growth
             )
+
+        if not growth:
+            file_name = 'gdppc-prediction-cone-comparison.png'
+        else:
+            file_name = 'growth-prediction-cone-comparison.png'
+
 
         fig.suptitle('Bayesian Prediction Cones')
         fig.autofmt_xdate()
         plt.savefig(os.path.join(
-            output_folder, 'prediction-cone-comparison.png'
+            output_folder, file_name
         ))

@@ -1,11 +1,13 @@
 import os
 import sys
-sys.path.insert(0, ".")
-from scipy import stats
-import numpy as np
-import matplotlib.pyplot as plt
-
 from itertools import groupby
+sys.path.insert(0, ".")
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+
 
 from model_of_australia.simulation_container import SimulationContainer
 from model_of_australia.data_loader import DataLoader
@@ -26,7 +28,7 @@ from scripts.fit_models import (
 from scripts import settings
 from scripts.load_data import (
     load_gva_pc_d, load_gdp_pc_d, load_un_gdp_pc_d,
-    load_imf_gdp_data
+    load_imf_gdppc_data, load_imf_gdppc_forecast
 )
 
 
@@ -113,18 +115,18 @@ specs = [
         SimpleSimulator,
         load_gdp_pc_d()
     ),
-    # (
-    #     'correlated_sectors',
-    #     'Correlated Sectors Simulation',
-    #     GDPSimulatorWithCorrelatedSectors,
-    #     load_gva_pc_d()
-    # ),
-    # (
-    #     'simple_international',
-    #     'Simple International Simulation',
-    #     CommonDistrubutionSimulator,
-    #     (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia'])
-    # ),
+    (
+        'correlated_sectors',
+        'Correlated Sectors Simulation',
+        GDPSimulatorWithCorrelatedSectors,
+        load_gva_pc_d()
+    ),
+    (
+        'simple_international',
+        'Simple International Simulation',
+        CommonDistrubutionSimulator,
+        (X_un_gdp_pc['Australia'], D_un_gdp_pc['Australia'])
+    ),
     (
         'international_shared_variance',
         'International Shared Variance Simulation',
@@ -133,7 +135,7 @@ specs = [
     ),
 ]
 
-containers = [
+containers = np.array([
     SimulationContainer(
         name=title,
         folder=name + '_model',
@@ -144,19 +146,21 @@ containers = [
         n_years=settings.N_YEARS, n_iter=settings.N_ITER
     )
     for name, title, simulator, data_pair in specs
-]
+])
 
 for container in containers:
     container.run()
 
 
-def plot_official_forecast(ax, of, title):
+def plot_official_forecast(ax, x, forecast, title):
     ax.set_title(title, fontsize=10)
     ax.tick_params(axis='x', labelsize=11)
-    ax.plot(of.index, of.values, 'k')  # , linewidth=2)
+    ax.plot(x.index, x.values)
+    ax.plot(forecast.index, forecast.values, 'k', linewidth=2)
 
 def prediction_cone_comparison_plot_with_official_forecast(
-        simulations, data_sets, currency, output_folder, official_forecast
+        simulations, data_sets, currency, output_folder,
+        official_data, official_forecast
     ):
         fig, axes, cm = PlottingTools.comparison_plot_setup(
             len(simulations) + 1, 'GDP per capita (%s)' % currency
@@ -175,7 +179,9 @@ def prediction_cone_comparison_plot_with_official_forecast(
             )
 
         plot_official_forecast(
-            axes[0], official_forecast[official_forecast.index >= min_date],
+            axes[0],
+            official_data[official_data.index >= min_date],
+            official_forecast,
             'IMF GDP Forecast'
         )
 
@@ -185,27 +191,38 @@ def prediction_cone_comparison_plot_with_official_forecast(
             output_folder, 'imf-forecast-with-prediction-cones.png'
         ))
 
-def compare_to_official_forecasts(containers, data_sets):
-    imf_data = load_imf_gdp_data()
+def plot_against_official_forecasts(containers, data_sets):
+    imf_data = load_imf_gdppc_data()
+    imf_forecast = load_imf_gdppc_forecast()
     X, D = load_gdp_pc_d()
     X_un, D_un = load_un_gdp_pc_d()
-
-    imf_data['gdp_pc'], imf_data['gdp_pc_d*']
 
     prediction_cone_comparison_plot_with_official_forecast(
         containers,
         data_sets,
         'AUD - Chain Volumes',
         os.path.join(settings.OUTPUTS_DIR, 'comparisons'),
-        imf_data['gdp_pc']
+        imf_data['gdp_pc'], imf_forecast['gdp_pc']
     )
 
-data_sets = [
+data_sets = np.array([
     (maybe_sum(data_pair[0].values), data_pair[0].index)
     for _, _, _, data_pair in specs
-]
+])
 
-compare_to_official_forecasts(containers, data_sets)
+
+PlottingTools.prediction_cone_comparison_plot(
+    containers[[0, 3]],
+    data_sets[[0, 3]],
+    'AUD - Chain Volumes',
+    os.path.join(settings.OUTPUTS_DIR, 'comparisons'),
+    max_date=pd.Timestamp('2020-01-01'),
+    growth=True
+)
+
+exit()
+
+plot_against_official_forecasts(containers[[0, 3]], data_sets[[0, 3]])
 print_summary_table(containers, print_consecutive_growth, 'Name & 2 years & 5 years & 10 years')
 print_neg_growth_table(containers)
 print_summary_table(containers, print_recession_p, 'Name & P(annual growth < 0)')
@@ -215,6 +232,6 @@ PlottingTools.prediction_cone_comparison_plot(
     containers,
     data_sets,
     'AUD - Chain Volumes',
-    os.path.join(settings.OUTPUTS_DIR, 'comparisons')
+    os.path.join(settings.OUTPUTS_DIR, 'comparisons'),
 )
 print('Done.')
