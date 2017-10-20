@@ -53,9 +53,10 @@ class DataLoader():
         raw = raw.drop(spec['date_spec']['col'], axis=1)
         raw['date'] = date_col
 
-        raw[spec['dollar_columns']] = (
-            raw[spec['dollar_columns']] * spec['dollar_conversion']
-        )
+        if spec['dollar_columns'] is not None:
+            raw[spec['dollar_columns']] = (
+                raw[spec['dollar_columns']] * spec['dollar_conversion']
+            )
 
         raw = raw.sort_values(by='date')
         raw = raw.reindex(index=range(len(raw)))
@@ -106,7 +107,7 @@ class DataLoader():
         elif axis == 1:
             return R[:, 1:] / R[:, :-1] - 1
         else:
-            raise ValueError('Number number is not supported: %i' % axis)
+            raise ValueError('Axis number is not supported: %i' % axis)
 
     def make_log_diff(df, fields):
         spec = {'date': df['date']}
