@@ -220,7 +220,12 @@ PlottingTools.prediction_cone_comparison_plot(
     growth=True
 )
 
-exit()
+PlottingTools.prediction_cone_comparison_plot(
+    containers[[0, 3]],
+    data_sets[[0, 3]],
+    'AUD - Chain Volumes',
+    os.path.join(settings.OUTPUTS_DIR, 'comparisons'),
+)
 
 plot_against_official_forecasts(containers[[0, 3]], data_sets[[0, 3]])
 print_summary_table(containers, print_consecutive_growth, 'Name & 2 years & 5 years & 10 years')
@@ -228,10 +233,4 @@ print_neg_growth_table(containers)
 print_summary_table(containers, print_recession_p, 'Name & P(annual growth < 0)')
 print_summary_table(containers, print_summary, 'Name & Mean & Std.')
 
-PlottingTools.prediction_cone_comparison_plot(
-    containers,
-    data_sets,
-    'AUD - Chain Volumes',
-    os.path.join(settings.OUTPUTS_DIR, 'comparisons'),
-)
 print('Done.')
