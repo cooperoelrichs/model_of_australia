@@ -69,7 +69,7 @@ class PlottingTools():
         plt.savefig(os.path.join(outputs_dir, 'prediction cone.png'))
 
     def comparison_plot_setup(n, ylabel):
-        fig, axes = plt.subplots(1, n, sharey=True, figsize=(14, 5))
+        fig, axes = plt.subplots(1, n, sharey=True, figsize=(9, 5))
         axes[0].set_ylabel(ylabel)
         cm = PlottingTools.prediction_cone_cmap()
         return fig, axes, cm
